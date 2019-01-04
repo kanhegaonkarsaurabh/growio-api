@@ -2,13 +2,14 @@
 
 [![Build Status](https://travis-ci.org/rwieruch/node-express-mongodb-server.svg?branch=master)](https://travis-ci.org/rwieruch/node-express-mongodb-server) [![Slack](https://slack-the-road-to-learn-react.wieruch.com/badge.svg)](https://slack-the-road-to-learn-react.wieruch.com/) [![Greenkeeper badge](https://badges.greenkeeper.io/rwieruch/node-express-mongodb-server.svg)](https://greenkeeper.io/)
 
-An easy way to get started with a Express server with MongoDB with Node.js.
+An easy way to get started with a Express server with MongoDB with Node.js. [Read more about it.](https://www.robinwieruch.de/mongodb-express-setup-tutorial/)
 
 ## Features
 
 * Babel 7
 * Environment Variables
 * Express
+* REST API
 * MongoDB
 
 ## Requirements
@@ -23,6 +24,7 @@ An easy way to get started with a Express server with MongoDB with Node.js.
 * `npm install`
 * [start MongoDB](https://www.robinwieruch.de/mongodb-express-setup-tutorial/)
 * `npm start`
+* optional: include *.env* in your *.gitignore*
 
 ### GET Routes
 
@@ -37,9 +39,9 @@ An easy way to get started with a Express server with MongoDB with Node.js.
 #### CURL
 
 * Create a message with:
-  * `curl -i -X POST -H "Content-Type:application/json" http://localhost:3000/messages -d '{"text":"Hi again, World"}'`
+  * `curl -X POST -H "Content-Type:application/json" http://localhost:3000/messages -d '{"text":"Hi again, World"}'`
 * Delete a message with:
-  * `curl -i -X DELETE -H "Content-Type:application/json" http://localhost:3000/messages/1`
+  * `curl -X DELETE -H "Content-Type:application/json" http://localhost:3000/messages/1`
 
 #### Postman
 

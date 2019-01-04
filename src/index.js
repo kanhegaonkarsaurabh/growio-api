@@ -1,105 +1,81 @@
 import 'dotenv/config';
 import cors from 'cors';
-import uuidv4 from 'uuid/v4';
 import bodyParser from 'body-parser';
 import express from 'express';
 
+import models, { connectDb } from './models';
+import routes from './routes';
+
 const app = express();
-
-app.use(cors());
-
-// Postman: x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Postman: raw + JSON (application/json)
-app.use(bodyParser.json());
-
-// Sample Data
-
-let users = {
-  1: {
-    id: '1',
-    username: 'Robin Wieruch',
-    messageIds: [1],
-  },
-  2: {
-    id: '2',
-    username: 'Dave Davids',
-    messageIds: [2],
-  },
-};
-
-let messages = {
-  1: {
-    id: '1',
-    text: 'Hello World',
-    userId: '1',
-  },
-  2: {
-    id: '2',
-    text: 'By World',
-    userId: '2',
-  },
-};
 
 // Application-Level Middleware
 
-app.use((req, res, next) => {
-  req.me = users[1];
+app.use(cors());
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(async (req, res, next) => {
+  req.context = {
+    models,
+    me: await models.User.findByLogin('rwieruch'),
+  };
   next();
 });
 
 // Routes
 
-app.get('/me', ({ me }, res) => {
-  return res.send(users[me.id]);
-});
+app.use('/session', routes.session);
+app.use('/users', routes.user);
+app.use('/messages', routes.message);
 
-app.get('/users', (req, res) => {
-  return res.send(Object.values(users));
-});
+// Start
 
-app.get('/users/:userId', (req, res) => {
-  return res.send(users[req.params.userId]);
-});
+const eraseDatabaseOnSync = true;
 
-app.get('/messages', (req, res) => {
-  return res.send(Object.values(messages));
-});
+connectDb().then(async () => {
+  if (eraseDatabaseOnSync) {
+    await Promise.all([
+      models.User.deleteMany({}),
+      models.Message.deleteMany({}),
+    ]);
 
-app.get('/messages/:messageId', (req, res) => {
-  return res.send(messages[req.params.messageId]);
-});
-
-app.post('/messages', ({ body: { text }, me }, res) => {
-  const id = uuidv4();
-  const message = {
-    id,
-    text: text,
-    userId: me.id,
-  };
-
-  messages[id] = message;
-  users[me.id].messageIds.push(id);
-
-  return res.send(message);
-});
-
-app.delete('/messages/:messageId', (req, res) => {
-  const {
-    [req.params.messageId]: message,
-    ...otherMessages
-  } = messages;
-
-  if (!message) {
-    return res.send(false);
+    createUsersWithMessages();
   }
 
-  messages = otherMessages;
-
-  return res.send(true);
+  app.listen(process.env.PORT, () =>
+    console.log(`Example app listening on port ${process.env.PORT}!`),
+  );
 });
 
-app.listen(process.env.PORT, () =>
-  console.log(`Example app listening on port ${process.env.PORT}!`),
-);
+const createUsersWithMessages = async () => {
+  const user1 = new models.User({
+    username: 'rwieruch',
+  });
+
+  const user2 = new models.User({
+    username: 'ddavids',
+  });
+
+  const message1 = new models.Message({
+    text: 'Published the Road to learn React',
+    user: user1.id,
+  });
+
+  const message2 = new models.Message({
+    text: 'Happy to release ...',
+    user: user2.id,
+  });
+
+  const message3 = new models.Message({
+    text: 'Published a complete ...',
+    user: user2.id,
+  });
+
+  await message1.save();
+  await message2.save();
+  await message3.save();
+
+  await user1.save();
+  await user2.save();
+};
