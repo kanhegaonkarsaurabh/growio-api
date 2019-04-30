@@ -2,4 +2,6 @@ logfile
 
 node_modules/
 package-lock.json
+
+# File for environment variables
 .env
