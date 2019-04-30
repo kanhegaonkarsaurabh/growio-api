@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(async (req, res, next) => {
   req.context = {
     models,
-    me: await models.User.findByLogin('rwieruch'),
+    me: await models.User.findByLogin('saurabh'),
   };
   next();
 });
@@ -37,7 +37,7 @@ connectDb().then(async () => {
       models.User.deleteMany({}),
     ]);
 
-    createUsersWithMessages();
+    createUsers();
   }
 
   app.listen(process.env.PORT, () =>
@@ -45,13 +45,13 @@ connectDb().then(async () => {
   );
 });
 
-const createUsersWithMessages = async () => {
+const createUsers = async () => {
   const user1 = new models.User({
-    username: 'rwieruch',
+    username: 'saurabh',
   });
 
   const user2 = new models.User({
-    username: 'ddavids',
+    username: 'yash',
   });
 
   await user1.save();
