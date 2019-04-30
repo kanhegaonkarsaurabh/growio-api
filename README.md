@@ -10,6 +10,7 @@
 * `git clone https://github.com/kanhegaonkarsaurabh/growio-api.git 
 * `cd growio-api`
 * `npm install`
+* `Create a .env file and copy details from 'env config' pinned message on backend channel`
 * [configure mongoDB]()
 * `npm start`
 * optional: include *.env* in your *.gitignore*
