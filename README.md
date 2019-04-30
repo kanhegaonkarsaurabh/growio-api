@@ -1,4 +1,4 @@
-# Simple Node with Express + MongoDB Server
+# Growio API Server
 
 ## Requirements
 
@@ -7,7 +7,7 @@
 
 ## Installation
 
-* `git clone https://github.com/kanhegaonkarsaurabh/growio-api.git 
+* `git clone https://github.com/kanhegaonkarsaurabh/growio-api.git` 
 * `cd growio-api`
 * `npm install`
 * Copy contents from ```.env.example``` to a file ```.env```
