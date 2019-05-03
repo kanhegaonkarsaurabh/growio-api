@@ -1,27 +1,35 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-  username: {
+  email: {
     type: String,
-    unique: true,
+    required: [true, 'email required'],
+    unique: [true, 'email already registered']
   },
-});
-
-userSchema.statics.findByLogin = async function(login) {
-  let user = await this.findOne({
-    username: login,
-  });
-
-  if (!user) {
-    user = await this.findOne({ email: login });
+  googleId: {       // NOTE: For now, it's called googleId. We'll rename this later.
+    type: String,
+    default: null
+  },
+  name: {
+    type: String, 
+    default: null
   }
-
-  return user;
-};
-
-userSchema.pre('remove', function(next) {
-  this.model('Message').deleteMany({ user: this._id }, next);
 });
+
+/* Commenting it out as this is not needed right now but might need in the future */ 
+
+// userSchema.statics.findByLogin = async function(login) {
+//   let user = await this.findOne({
+//     username: login,
+//   });
+
+//   if (!user) {
+//     user = await this.findOne({ email: login });
+//   }
+
+//   return user;
+// };
+
 
 const User = mongoose.model('User', userSchema);
 
