@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import PersonalPlant from './personalPlant';
 
 const gardenSchema = new mongoose.Schema({
     name: {
@@ -6,7 +7,7 @@ const gardenSchema = new mongoose.Schema({
         default: null       // for now, will eventually be _____'s Garden
     },
     plants: {
-        type: [Object],      // will be a plant object each
+        type: [PersonalPlant],      // will be a plant object each
         default: []
     }
 });
