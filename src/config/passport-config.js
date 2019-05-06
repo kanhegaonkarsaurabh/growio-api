@@ -14,13 +14,13 @@ passport.use(
     const name = profile.displayName;
 
     // check if user already exists
-    const currentUser = await User.findOne({ googleId: profile.id });
+    const currentUser = await User.findOne({ _id: profile.id });
     if (currentUser) {
       // already have the user -> return (login)
       return done(null, currentUser);
     } else {
       // register user and return
-      const newUser = await new User({ email: email, googleId: profile.id, name: name }).save();
+      const newUser = await new User({ email: email, _id: profile.id, name: name }).save();
       return done(null, newUser);
     }
   })

@@ -24,6 +24,11 @@ app.use(async (req, res, next) => {
   }
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.header('Access-Control-Expose-Headers', 'Content-Disposition');
+
+  // Attach all the database as a context to all requests made throughout the app
+  req.context = {
+    models, 
+  }
   next();
 });
 
@@ -32,11 +37,10 @@ app.use(async (req, res, next) => {
 app.use('/users', routes.user);
 app.use('/auth', routes.auth);
 
-// Start
+// Toggle this only when you want to clean and reset the db completely on start
+const eraseDatabaseOnSync = true; 
 
-const eraseDatabaseOnSync = true;
-
-connectDb().then(async () => {
+connectDb().then(async () => {  // connect mongodb to our backend app
   if (eraseDatabaseOnSync) {
     await Promise.all([
       models.User.deleteMany({}),
