@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
   }
 });
 
+
 userSchema.statics.findByLogin = async function(login) {
   // First check the db to find the user by email if he passes email as param
   let user = await this.findOne({
