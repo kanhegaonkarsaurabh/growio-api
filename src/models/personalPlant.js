@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const personalPlantSchema = new mongoose.Schema({
+export const personalPlantSchema = new mongoose.Schema({
     plant_id: {
         type: Number,       // or whatever we end up using (String from USDA)
         required: true           
@@ -15,6 +15,4 @@ const personalPlantSchema = new mongoose.Schema({
     }
 });
 
-const PersonalPlant = mongoose.model('PersonalPlant', personalPlantSchema);
-
-export default PersonalPlant;
+export const PersonalPlant = mongoose.model('PersonalPlant', personalPlantSchema);
