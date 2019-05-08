@@ -5,3 +5,5 @@ package-lock.json
 
 # File for environment variables
 .env
+
+/*.jpg

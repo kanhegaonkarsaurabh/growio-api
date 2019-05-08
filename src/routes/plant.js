@@ -3,6 +3,7 @@ import { Router } from 'express';
 const multer = require("multer");
 const cloudinary = require("cloudinary");
 const cloudinaryStorage = require("multer-storage-cloudinary");
+
 const router = Router();
 
 // cloudinary API configuration
@@ -26,11 +27,14 @@ const parser = multer({storage: storage});
 
 
 // route to identify the plant
-router.post('/identify', parser.single("image"), (req,res) => {
+router.post('/identify', parser.single("image"), (req, res) => {
+    console.log(req.file);
     const image = {}
     image.url = req.file.url;
     image.id = req.file.public_id;
     console.log(image);
 });
+
+export default router;
 
 
