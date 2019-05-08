@@ -36,6 +36,7 @@ app.use(async (req, res, next) => {
 
 app.use('/users', routes.user);
 app.use('/auth', routes.auth);
+app.use('/plant', routes.plant);
 
 // Toggle this only when you want to clean and reset the db completely on start
 const eraseDatabaseOnSync = true; 
