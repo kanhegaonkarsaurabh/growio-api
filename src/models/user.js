@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   _id: {          // We override the default mongo '_id' with google's uid for the user 
-    type: String
+    type: mongoose.Schema.ObjectId, 
   },
   email: {
     type: String,
@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema({
   },
   name: {
     type: String, 
+    default: null
+  },
+  gardenId: {
+    type: String,
     default: null
   }
 });
