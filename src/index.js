@@ -39,7 +39,7 @@ app.use('/auth', routes.auth);
 app.use('/garden', routes.garden);
 
 // Toggle this only when you want to clean and reset the db completely on start
-const eraseDatabaseOnSync = true; 
+const eraseDatabaseOnSync = process.env.DB_ERASE === 'yes'; 
 
 connectDb().then(async () => {  // connect mongodb to our backend app
   if (eraseDatabaseOnSync) {
