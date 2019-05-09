@@ -9,14 +9,15 @@ router.get('/plants', checkTokenMiddleware, async function (req, res) {
   } 
   
   // userId of the user who's authenticated right now .....
-  const userId = res.authData.userId;
+  const userId = req.authData.userId;
   const user = await req.context.models.User.findById(userId);
 
-  // get the garden id on this user
-  const gardenId = user.gardenId;
-  const garden = await req.context.models.Garden.findById(gardenId);
+  /* NOTE: Uncomment after Add to MyGarden has been implemented */
+  // // get the garden id on this user
+  // const gardenId = user.gardenId;
+  // const garden = await req.context.models.Garden.findById(gardenId);
 
-  return res.send(garden.plants);
+  // return res.send(garden.plants);
 });
 
 export default router;
