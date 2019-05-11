@@ -15,7 +15,4 @@ export const personalPlantSchema = new mongoose.Schema({
   },
 });
 
-export const PersonalPlant = mongoose.model(
-  'PersonalPlant',
-  personalPlantSchema,
-);
+export const PersonalPlant = mongoose.model('PersonalPlant', personalPlantSchema);

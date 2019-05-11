@@ -1,11 +1,7 @@
 import { Router } from 'express';
 import passport from 'passport';
 import passportConfig from '../config/passport-config';
-import {
-  checkTokenMiddleware,
-  verifyToken,
-  signToken,
-} from '../config/authJwt';
+import { checkTokenMiddleware, verifyToken, signToken } from '../config/authJwt';
 
 const router = Router();
 
@@ -19,13 +15,9 @@ router.get(
 );
 
 // callback url upon successful google authentication
-router.get(
-  '/google/callback',
-  passport.authenticate('google', { session: false }),
-  (req, res) => {
-    signToken(req, res);
-  },
-);
+router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
+  signToken(req, res);
+});
 
 // Verification route to check if authentication works
 router.get('/verify', checkTokenMiddleware, (req, res) => {

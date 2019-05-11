@@ -22,10 +22,7 @@ app.use(async (req, res, next) => {
   if (allowedOrigins.indexOf(origin) > -1) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept',
-  );
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   res.header('Access-Control-Expose-Headers', 'Content-Disposition');
 
   // Attach all the database as a context to all requests made throughout the app
