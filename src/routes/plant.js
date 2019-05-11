@@ -33,6 +33,20 @@ router.post('/identify', parser.single("image"), (req, res) => {
     image.url = req.file.url;
     image.id = req.file.public_id;
     console.log(image);
+
+    request({
+        method: 'POST',
+        url: 'https://private-anon-9aba0bab48-plantid.apiary-mock.com/identify',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: {
+            key: process.env.PLANTID_APIKEY,
+            images: [
+                
+            ]
+        }
+    })
 });
 
 export default router;
