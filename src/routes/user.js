@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { isAuthenticated } from '../config/authJwt';
 
 const router = Router();
 
@@ -12,8 +13,14 @@ const getUser = async (req, res) => {
   return res.send(user);
 };
 
-router.route('/').get(getUsers);
+router
+  .route('/')
+  .all(isAuthenticated)
+  .get(getUsers);
 
-router.route('/:userId').get(getUser);
+router
+  .route('/:userId')
+  .all(isAuthenticated)
+  .get(getUser);
 
 export default router;
