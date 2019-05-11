@@ -8,7 +8,10 @@ const isAuthenticated = (req, res, next) => {
     req.token = jwtToken; // Attach token to the request attribute
     jwt.verify(req.token, process.env.JWT_SECRETKEY, (err, authData) => {
       if (err) {
-        res.status(403).send({});
+        res.status(403).send({
+          success: false,
+          message: 'Invalid token. Could not authenticate!',
+        });
       } else {
         req.authData = authData;
         next();
@@ -38,4 +41,4 @@ const signToken = (req, res) => {
   );
 };
 
-export { checkTokenMiddleware, verifyToken, signToken };
+export { isAuthenticated, signToken };

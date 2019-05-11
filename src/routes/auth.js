@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import passport from 'passport';
 import passportConfig from '../config/passport-config';
-import { checkTokenMiddleware, verifyToken, signToken } from '../config/authJwt';
+import { isAuthenticated, signToken } from '../config/authJwt';
 
 const router = Router();
 
@@ -20,13 +20,8 @@ router.get('/google/callback', passport.authenticate('google', { session: false 
 });
 
 // Verification route to check if authentication works
-router.get('/verify', checkTokenMiddleware, (req, res) => {
-  verifyToken(req, res);
-  if (null === req.authData) {
-    res.sendStatus(403);
-  } else {
-    res.json(req.authData);
-  }
+router.get('/verify', isAuthenticated, (req, res) => {
+  res.json(req.authData);
 });
 
 export default router;
