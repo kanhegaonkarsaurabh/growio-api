@@ -2,6 +2,12 @@ import { Router } from 'express';
 import { checkTokenMiddleware, verifyToken } from '../config/authJwt';
 const router = Router();
 
+const getPersonalPlants = async (req, res) => {
+
+}
+
+
+
 router.get('/plants', checkTokenMiddleware, async function (req, res) {
   verifyToken(req, res);
   if (null === req.authData) {
@@ -19,5 +25,8 @@ router.get('/plants', checkTokenMiddleware, async function (req, res) {
 
   // return res.send(garden.plants);
 });
+
+router.route('/plants')
+      .get(getPersonalPlants);
 
 export default router;
