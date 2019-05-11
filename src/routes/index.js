@@ -3,5 +3,5 @@ import auth from './auth';
 
 export default {
   user,
-  auth
+  auth,
 };
