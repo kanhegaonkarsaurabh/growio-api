@@ -26,19 +26,14 @@ const isAuthenticated = (req, res, next) => {
 };
 
 // Create a token and send it to the client for further access.
-const signToken = (req, res) => {
-  jwt.sign(
-    { userId: req.user._id },
-    process.env.JWT_SECRETKEY,
-    { expiresIn: '5 min' },
-    (err, token) => {
-      if (err) {
-        res.sendStatus(500);
-      } else {
-        res.json({ token });
-      }
-    },
-  );
+const signToken = (id, res) => {
+  jwt.sign({ userId: id }, process.env.JWT_SECRETKEY, { expiresIn: '5 min' }, (err, token) => {
+    if (err) {
+      res.sendStatus(500);
+    } else {
+      res.json({ token });
+    }
+  });
 };
 
 export { isAuthenticated, signToken };
