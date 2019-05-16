@@ -3,6 +3,8 @@ import GoogleStrategy from 'passport-google-oauth20';
 import mongoose from 'mongoose';
 import mongodb from 'mongodb';
 import crypto from 'crypto';
+import Garden from '../models/garden';
+
 const ObjectId = mongodb.ObjectID;
 
 const User = mongoose.model('User');
@@ -27,18 +29,22 @@ passport.use(
 
       // check if user already exists
       const currentUser = await User.findById(new ObjectId(uidHash));
-      if (currentUser) {
-        // already have the user -> return (login)
-        return done(null, currentUser);
-      } else {
+      if (!currentUser) {
+        // create a new garden XXX
+        const garden = await new Garden({
+          name: name + "'s Garden",
+        }).save();
+
         // register user and return
         const newUser = await new User({
           email: email,
           _id: new ObjectId(uidHash),
           name: name,
+          gardenId: garden._id, // NOTE: type check
         }).save();
         return done(null, newUser);
       }
+      return done(null, currentUser);
     },
   ),
 );

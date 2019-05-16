@@ -11,7 +11,7 @@ export const personalPlantSchema = new mongoose.Schema({
   },
   notifications: {
     type: Boolean,
-    required: true,
+    default: false,
   },
 });
 
