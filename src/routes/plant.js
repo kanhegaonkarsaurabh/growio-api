@@ -24,6 +24,10 @@ const storage = cloudinaryStorage({
     transformation: [{ width: 500, height: 500, crop:"limit" }]
 });
 
+// Sleeps the execution of the function
+const sleep = (milliseconds) => {
+    return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
 
 // POST request middleware parser
 const parser = multer({storage: storage});
@@ -52,49 +56,11 @@ const parser = multer({storage: storage});
 //     })
 // });
 
-let retry = (function() {
-    let count = 0;
+// let retry = (function() {
+//     let count = 0;
   
-    return function(apiPlantId, max, timeout, next) {
-        request({
-            method: 'POST',
-            url: 'https://plant.id/api/check_identifications',
-            headers: { 'Content-Type': 'application/json' },
-            body: {
-                key: process.env.PLANTID_APIKEY,
-                ids: [parseInt(apiPlantId)]
-            },
-            json: true
-        }, function (err, res, body) {
-            if (err || res.statusCode !== 200) {
-                console.log('Failed request');
-                return next(new Error('API request failed'));
-            }
-            if (res || res.length <= 0 || res.body.suggestions.length <= 0) {
-                console.log('no suggestions sent!' + count);
-        
-                if (count++ < max) {
-                  return setTimeout(function() {
-                    retry(apiPlantId, max, timeout, next);
-                  }, timeout);
-                } else {
-                  return next(new Error('max retries reached'));
-                }
-              }
-              console.log('success');
-              next(null, body);
-        })
-      
-    }
-  })();
-  
-
-
-// const checkPlantId = async (apiPlantId) => {
-//     console.log('this id'+apiPlantId);
-    
-//     while (true) {
-//         const resp = await request({
+//     return function(apiPlantId, max, timeout, next) {
+//         request({
 //             method: 'POST',
 //             url: 'https://plant.id/api/check_identifications',
 //             headers: { 'Content-Type': 'application/json' },
@@ -103,20 +69,69 @@ let retry = (function() {
 //                 ids: [parseInt(apiPlantId)]
 //             },
 //             json: true
-//         }, (err, res, body) => {
-//             if (err) {
-//                 console.log(err)
+//         }, function (err, res, body) {
+//             if (err || res.statusCode !== 200) {
+//                 console.log('Failed request');
+//                 return next(new Error('API request failed'));
 //             }
-//             console.log('Status:', res.statusCode);
-//             console.log('Headers:', JSON.stringify(res.headers));
-//             console.log('Response:', body);
+//             if (res || res.length <= 0 || res.body.suggestions.length <= 0) {
+//                 console.log('no suggestions sent!' + count);
+        
+//                 if (count++ < max) {
+//                   return setTimeout(function() {
+//                     retry(apiPlantId, max, timeout, next);
+//                   }, timeout);
+//                 } else {
+//                   return next(new Error('max retries reached'));
+//                 }
+//               }
+//               console.log('success');
+//               next(null, body);
 //         })
+      
 //     }
+//   })();
+  
+
+
+const checkPlantId = async (apiPlantId) => {
+    console.log('Currently working on request: ', apiPlantId);
+    let suggestionsList = null;
+    await sleep(5000);
+    while (true) {
+        console.log('this is working :)');
+        await sleep(5000);              // IMPORTANT LINE
+        const resp = await request({
+            method: 'POST',
+            url: 'https://plant.id/api/check_identifications',
+            headers: { 'Content-Type': 'application/json' },
+            body: {
+                key: process.env.PLANTID_APIKEY,
+                ids: [parseInt(apiPlantId)]
+            },
+            json: true
+        }, (err, res, body) => {
+            if (err) {
+                console.log('ERROR: checkPlantId() function request failed', err);
+            }
+            if (res.body.suggestions) {
+                if (res.body.suggestions.length > 0) {
+                    suggestionsList = res.body.suggestions;
+                    console.log('this', suggestionsList);
+                    return;
+                }
+            }
+        });
+        if (suggestionsList !== null) {
+            console.log('inside if',suggestionsList)
+            break;
+        }
+        console.log(suggestionsList);
+    }
     
-// }
+}
 
 const plantId = async (encImage) => {
-
     await request({
         method: 'POST',
         url: 'https://plant.id/api/identify',
@@ -128,17 +143,16 @@ const plantId = async (encImage) => {
         json: true
     }, (err, res, body) => { 
         if (err) {
-            console.log(err)
+            console.log('ERROR: platnId() request failed', err);
+            return;
         }
-        // console.log('Status:', res.statusCode);
-        // console.log('Headers:', JSON.stringify(res.headers));
-        // console.log('Response:', body);
 
         // extract the plant ID
-        const apiPlantId = (res.body.id);
-        retry(apiPlantId, 200, 1000, function(err, body) {
-            console.log('Successful suggestions bitch!', body);
-        });
+        if (body && body.id) {
+            const apiPlantId = (body.id);
+            console.log('api id: ', apiPlantId);
+            checkPlantId(apiPlantId);
+        }
     })
 }
 
