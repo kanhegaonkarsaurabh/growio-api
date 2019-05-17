@@ -206,7 +206,7 @@ const identifyPlant = async (req, res) => {
             await sleep(5000);
             suggestionsHelper(plantRequestId, count, function (body) {        // callback function here ends everything
                 console.log('SUCCESS: The suggestions are the following', body);
-                res.send({body});
+                res.send({suggestions:body[0].suggestions});
             });
         })
         .catch((err) => {
