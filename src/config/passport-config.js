@@ -29,6 +29,7 @@ passport.use(
 
       // check if user already exists
       const currentUser = await User.findById(new ObjectId(uidHash));
+      console.log('current User: ', currentUser);
       if (!currentUser) {
         // create a new garden XXX
         const garden = await new Garden({

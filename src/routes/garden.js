@@ -24,21 +24,23 @@ const getPersonalPlants = async (req, res) => {
 const addPersonalPlant = async (req, res) => {
   // Extract scientific name of plant from request
   const sciName = req.body.sciName;
+  const nickname = req.body.nickname;
 
   // check if the plant exists in the plant collection
-  let foundPlant = await Plant.find({ scientificName: sciName });
+  let foundPlant = await Plant.findOne({ scientificName: sciName });
 
   // if not found, add to plant collection
   if (!foundPlant) {
     // TODO: Query USDA api for the details
   }
-
+  console.log('Found plant: ', foundPlant.id);
+  console.log('Found plant: ', foundPlant);
   let plantId = foundPlant._id;
 
   // Create the user's personal plant
   const personalPlant = await new PersonalPlant({
     plant_id: plantId,
-    nickname: req.body.nickname,
+    nickname: nickname,
   }).save();
 
   // User id of the current user
@@ -48,10 +50,44 @@ const addPersonalPlant = async (req, res) => {
   // get the garden id of the user
   let gId = user.gardenId;
 
-  const garden = await Garden.findOneAndUpdate({ _id: gId }, { $push: { plants: personalPlant } });
-  res.status(200).send({
-    plants: garden.plants,
-    msg: 'Plant added to garden',
+  const garden = await Garden.findById(gId);
+  garden.plants.push(personalPlant);
+  garden.save(error => {
+    if (error) {
+      res
+        .sendStatus(404)
+        .send({ msg: `ERROR: Could not add ${sciName}-${nickname} plant in Garden` });
+    } else {
+      res
+        .sendStatus(200)
+        .send({ msg: `SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden` });
+    }
+  });
+};
+
+const removePersonalPlant = async (req, res) => {
+  // get the id of the personalPlant to remove
+  let nicknameToRemove;
+  if (req.body && req.body.data) {
+    nicknameToRemove = req.body.data.nickname;
+  }
+
+  const currentUser = User.findById(req.authData.userId);
+  let gId = user.gardenId;
+  const garden = await Garden.findById(gId);
+
+  // Remove the personalPlant
+  garden.plants.pull({ nickname: nicknameToRemove });
+  garden.save(error => {
+    if (error) {
+      res
+        .sendStatus(404)
+        .send({ msg: `ERROR: Could not find ${nicknameToRemove} plant in Garden` });
+    } else {
+      res
+        .sendStatus(200)
+        .send({ msg: `SUCCESS: Successfully removed ${nicknameToRemove} plant from Garden` });
+    }
   });
 };
 
@@ -60,6 +96,10 @@ router
   .all(isAuthenticated)
   .get(getPersonalPlants);
 
-router.route('/plant').post(addPersonalPlant);
+router
+  .route('/plant')
+  .all(isAuthenticated)
+  .post(addPersonalPlant)
+  .delete(removePersonalPlant);
 
 export default router;
