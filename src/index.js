@@ -12,8 +12,8 @@ const app = express();
 
 app.use(cors());
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 app.use(async (req, res, next) => {
   /* Bunch of code copied off of s/o so as to allow headers on requests */
@@ -37,6 +37,7 @@ app.use(async (req, res, next) => {
 app.use('/users', routes.user);
 app.use('/auth', routes.auth);
 app.use('/garden', routes.garden);
+app.use('/plant', routes.plant);
 
 // Toggle this only when you want to clean and reset the db completely on start
 const eraseDatabaseOnSync = process.env.DB_ERASE === 'yes';
