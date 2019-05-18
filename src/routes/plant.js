@@ -21,7 +21,16 @@ const sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
-
+export const uploadToCloudinary = (imageUrl) => {
+    cloudinary.uploader.upload(imageUrl, 
+        {"folder":"plants_identify", "width":500, "height":500, "crop":"limit"},
+        function (err, image) {
+            if (err) {
+                console.log(err);
+            }
+            return image.url;
+        })
+}
 
 const identifyOptions = (encImage) => {
     return {
@@ -80,17 +89,8 @@ const identifyPlant = async (req, res) => {
                 console.log('SUCCESS: The suggestions are the following', body);
 
                 // extract the images list
-                const image = body[0].images[0];
-                cloudinary.uploader.upload(image.url, 
-                    {"folder":"plants_identify", "width":500, "height":500, "crop":"limit"},
-                    function (err, image) {
-                        if (err) {
-                            console.log(err);
-                        }
-                        console.log(image);
-                    })
-
-                res.send({suggestions:body[0].suggestions});
+                //const image = body[0].images[0];
+                res.send({body});
             });
         })
         .catch((err) => {
@@ -101,6 +101,6 @@ const identifyPlant = async (req, res) => {
 router.route('/identify')
       .post(identifyPlant)
 
-export default router;
+module.exports = router;
 
 
