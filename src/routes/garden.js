@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
 import { isAuthenticated } from '../config/authJwt';
+import { uploadToCloudinary } from './plant';
 const router = Router();
 
 const User = mongoose.model('User');
@@ -26,6 +27,11 @@ const addPersonalPlant = async (req, res) => {
   const sciName = req.body.sciName;
   const nickname = req.body.nickname;
 
+  // Extract image url from request
+  const imageUrl = req.body.imageUrl;
+  // upload the image to cloudinary and store the url of where it is stored
+  plantUrl = uploadToCloudinary(imageUrl);
+
   // check if the plant exists in the plant collection
   let foundPlant = await Plant.findOne({ scientificName: sciName });
 
@@ -41,6 +47,7 @@ const addPersonalPlant = async (req, res) => {
   const personalPlant = await new PersonalPlant({
     plant_id: plantId,
     nickname: nickname,
+    plant_url: plantUrl,
   }).save();
 
   // User id of the current user

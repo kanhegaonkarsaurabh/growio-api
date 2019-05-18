@@ -9,6 +9,10 @@ export const personalPlantSchema = new mongoose.Schema({
     type: String,
     default: null, // will by default be the common name of the plant
   },
+  plant_url: {
+    type: String,
+    default: null,
+  },
 });
 
 export const PersonalPlant = mongoose.model('PersonalPlant', personalPlantSchema);
