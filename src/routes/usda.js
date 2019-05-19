@@ -1,9 +1,21 @@
 import { Router } from 'express';
-import { queryPlantDetails } from '../config/usda';
+//import { queryPlantDetails } from '../config/usda';
+var request = require('request');
 
 const router = Router();
 
-router.get('/usda', async function(req, res) {
-  const ret = queryPlantDetails('omg');
-  return ret;
+router.get('/', async function(req, res) {
+  request('http://plantsdb.xyz/search?Genus=Abutilon&Species=abutiloides', function(
+    error,
+    response,
+    body,
+  ) {
+    if (error) {
+      console.log(error);
+    }
+    console.log(body);
+    res.json(body);
+  });
 });
+
+export default router;
