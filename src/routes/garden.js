@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
 import { isAuthenticated } from '../config/authJwt';
+import { queryPlantDetails } from '../config/usda';
 const router = Router();
 
 const User = mongoose.model('User');
@@ -31,7 +32,28 @@ const addPersonalPlant = async (req, res) => {
 
   // if not found, add to plant collection
   if (!foundPlant) {
-    // TODO: Query USDA api for the details
+    // get the object that has the information we need
+    // based on the query to USDA database
+    const JSONobj = queryPlantDetails(sciName);
+
+    // TODO: from here, how do i add this to database??
+
+    // (i tried something)
+
+    // Create a plant object
+    const newPlant = await new Plant({
+      scientificName: JSONobj.sciName,
+      commonName: JSONobj.commonName,
+      //plantImg: /*TODO*/,
+      wateringFrequency: JSONobj.waterFreq,
+      temperature_min: JSONobj.temp,
+    }).save();
+
+    // TODO: put this plant into the database
+    Plant.push(newPlant); // ????
+
+    // so that we can refer to it later on
+    foundPlant = newPlant;
   }
   console.log('Found plant: ', foundPlant.id);
   console.log('Found plant: ', foundPlant);

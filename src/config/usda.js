@@ -20,11 +20,6 @@ const queryPlantDetails = (sciName, callback) => {
       qs: queryObject,
     },
     async function(error, response, body) {
-      // console.log(body);
-
-      // console.log(resJson);
-      // what info do we need from this?
-
       //  MAIN
       //      sci name: sciName
       //      water frequency: Moisture_Use (conver to number)
@@ -37,15 +32,18 @@ const queryPlantDetails = (sciName, callback) => {
       //      pruning:
       //      humidity:
 
+      // get the data we need in JSON format
       var obj = JSON.parse(body);
       var data = obj.data[0];
 
+      // extract all the info we need from the JSON list
       var waterFreq = data.Moisture_Use;
       var commonName = data.Common_Name;
       var sunLight = data.Shade_Tolerance;
       var tempMin = data.Temperature_Minimum_F;
       var fertilizer = data.Fertility_Requirement;
 
+      // JSON object with the information we need
       var thing = {
         sciName: sciName,
         waterFreq: waterFreq,
@@ -57,9 +55,8 @@ const queryPlantDetails = (sciName, callback) => {
 
       console.log(thing);
 
-      // JSON.parse(body,)
-
       callback(body);
+      return thing;
     },
   );
 };
