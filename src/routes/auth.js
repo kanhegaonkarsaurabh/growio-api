@@ -1,6 +1,10 @@
 import { Router } from 'express';
+import mongodb from 'mongodb';
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 const User = mongoose.model('User');
+
+const ObjectId = mongodb.ObjectID;
 
 import {
   createConnection,
@@ -26,13 +30,18 @@ const loginWithGoogle = async (req, res) => {
 };
 
 const addToDb = async profile => {
+  const uidHash = crypto
+    .createHmac('sha256', profile.id.toString())
+    .digest('hex')
+    .slice(0, 24); // input: googleId --> hash() --> output: 24 byte hex string
+
   // check if user already exists
-  const currentUser = await User.findOne({ _id: profile.id });
+  const currentUser = await User.findOne({ _id: new ObjectId(uidHash) });
   if (!currentUser) {
     // register user and return
     const newUser = await new User({
       email: profile.email,
-      _id: profile.id,
+      _id: new ObjectId(uidHash),
       name: profile.name,
     }).save();
   }
