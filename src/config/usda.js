@@ -20,70 +20,31 @@ const queryPlantDetails = (sciName, callback) => {
       qs: queryObject,
     },
     async function(error, response, body) {
-      //  MAIN
-      //      sci name: sciName
-      //      water frequency: Moisture_Use (conver to number)
-      //      common name: Common_Name
-      //      sunlight: Shade_Tolerance
-      //      temperature: Temperature_Minimum_F (only have min)
-
-      //  Additional:
-      //      fertilizer: Fertility_Requirement
-      //      pruning:
-      //      humidity:
-
       // get the data we need in JSON format
       var obj = JSON.parse(body);
       var data = obj.data[0];
 
       // extract all the info we need from the JSON list
-      var waterFreq = data.Moisture_Use;
+      var moistureUse = data.Moisture_Use;
       var commonName = data.Common_Name;
       var sunLight = data.Shade_Tolerance;
       var tempMin = data.Temperature_Minimum_F;
       var fertilizer = data.Fertility_Requirement;
 
       // JSON object with the information we need
-      var thing = {
-        sciName: sciName,
-        waterFreq: waterFreq,
+      var JSONobj = {
+        scientificName: sciName,
         commonName: commonName,
+        moisture_use: moistureUse,
         sunlight: sunLight,
-        temp: tempMin,
-        fertilizer: fertilizer,
+        temperature: tempMin,
       };
 
-      console.log(thing);
+      // console.log(thing);
 
-      callback(thing);
-      //return thing;
+      callback(JSONobj);
     },
   );
 };
 
 export { queryPlantDetails };
-
-// // Load OpenWeather Credentials
-// var OpenWeatherAppId = require('../config/third-party').openWeather;
-
-// router.post('/getCurrentWeather', function (req, res) {
-//     var urlOpenWeatherCurrent = 'http://api.openweathermap.org/data/2.5/weather?'
-//     var queryObject = {
-//         APPID: OpenWeatherAppId.appId,
-//         lat: req.body.lat,
-//         lon: req.body.lon
-//     }
-//     console.log(queryObject)
-//     request({
-//         url:urlOpenWeatherCurrent,
-//         qs: queryObject
-//     }, function (error, response, body) {
-//         if (error) {
-//             console.log('error:', error); // Print the error if one occurred
-
-//         } else if(response && body) {
-//             console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-//             res.json({'body': body}); // Print JSON response.
-//         }
-//     })
-// })

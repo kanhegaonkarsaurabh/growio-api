@@ -34,26 +34,16 @@ const addPersonalPlant = async (req, res) => {
   if (!foundPlant) {
     // get the object that has the information we need
     // based on the query to USDA database
-    const JSONobj = queryPlantDetails(sciName);
+    queryPlantDetails(sciName, async JSONobj => {
+      // Create a plant object
+      const newPlant = await new Plant(JSONobj).save();
 
-    // TODO: from here, how do i add this to database??
+      // TODO: put this plant into the database
+      Plant.push(newPlant);
 
-    // (i tried something)
-
-    // Create a plant object
-    const newPlant = await new Plant({
-      scientificName: JSONobj.sciName,
-      commonName: JSONobj.commonName,
-      //plantImg: /*TODO*/,
-      wateringFrequency: JSONobj.waterFreq,
-      temperature_min: JSONobj.temp,
-    }).save();
-
-    // TODO: put this plant into the database
-    Plant.push(newPlant); // ????
-
-    // so that we can refer to it later on
-    foundPlant = newPlant;
+      // so that we can refer to it later on
+      foundPlant = newPlant;
+    });
   }
   console.log('Found plant: ', foundPlant.id);
   console.log('Found plant: ', foundPlant);
