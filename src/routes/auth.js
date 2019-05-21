@@ -2,6 +2,7 @@ import { Router } from 'express';
 import mongoose from 'mongoose';
 import mongodb from 'mongodb';
 import crypto from 'crypto';
+import colors from 'colors';
 
 const User = mongoose.model('User');
 const Garden = mongoose.model('Garden');
@@ -31,6 +32,10 @@ const loginWithGoogle = async (req, res) => {
 };
 
 const addToDb = async profile => {
+  console.log(
+    `LOG: Adding user: ${profile.id} to the database and creating his garden`.yellow,
+    profile,
+  );
   const uidHash = crypto
     .createHmac('sha256', profile.id.toString())
     .digest('hex')
