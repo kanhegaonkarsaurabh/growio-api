@@ -22,23 +22,11 @@ const plantSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  precipitation_max: {
-    type: Number,
-    default: null,
-  },
-  precipitation_min: {
-    type: Number,
-    default: null,
-  },
   moisture_use: {
     type: Number,
     default: null,
   },
-  temperature_min: {
-    type: Number,
-    default: null,
-  },
-  temperature_max: {
+  temperature: {
     type: Number,
     default: null,
   },

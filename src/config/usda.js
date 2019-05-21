@@ -55,8 +55,8 @@ const queryPlantDetails = (sciName, callback) => {
 
       console.log(thing);
 
-      callback(body);
-      return thing;
+      callback(thing);
+      //return thing;
     },
   );
 };
