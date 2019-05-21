@@ -30,7 +30,7 @@ const addPersonalPlant = async (req, res) => {
   // Extract image url from request
   const imageUrl = req.body.imageUrl;
   // upload the image to cloudinary and store the url of where it is stored
-  plantUrl = uploadToCloudinary(imageUrl);
+  const plantUrl = uploadToCloudinary(imageUrl);
 
   // check if the plant exists in the plant collection
   let foundPlant = await Plant.findOne({ scientificName: sciName });

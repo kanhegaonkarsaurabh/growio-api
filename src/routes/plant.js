@@ -32,6 +32,17 @@ export const uploadToCloudinary = imageUrl => {
   );
 };
 
+export const removeFromCloudinary = plantUrl => {
+  const id = plantUrl.split('/')[6].split('.')[0];
+
+  cloudinary.uploader.destroy(id, (err, res) => {
+    if (err) {
+      console.log(err);
+    }
+    return res.result;
+  });
+};
+
 const identifyOptions = encImage => {
   return {
     method: 'POST',

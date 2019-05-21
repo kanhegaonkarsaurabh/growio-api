@@ -12,10 +12,6 @@ const plantSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  plantImage: {
-    type: Buffer, // image is stored as Base64 encoded string which is basically Binary, Buffer is best way to store
-    default: null,
-  },
   /* everything after this point is up in 
      the air whether it needs to be here and what the default values and stuff will be */
   wateringFrequency: {
