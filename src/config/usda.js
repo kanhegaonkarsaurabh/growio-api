@@ -21,6 +21,7 @@ const queryPlantDetails = (sciName, callback) => {
     },
     async function(error, response, body) {
       // get the data we need in JSON format
+      console.log('\n\n\n\n' + body);
       var obj = JSON.parse(body);
       var data = obj.data[0];
 

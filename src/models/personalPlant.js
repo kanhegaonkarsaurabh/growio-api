@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 export const personalPlantSchema = new mongoose.Schema({
   plant_id: {
-    type: Number, // or whatever we end up using (String from USDA)
+    type: String, // or whatever we end up using (String from USDA)
     required: true,
   },
   nickname: {

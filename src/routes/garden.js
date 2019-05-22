@@ -24,6 +24,9 @@ const getPersonalPlants = async (req, res) => {
 
 const addPersonalPlant = async (req, res) => {
   // Extract scientific name of plant from request
+
+  console.log('i hate s, ', req.body);
+
   const sciName = req.body.sciName;
   const nickname = req.body.nickname;
 
@@ -34,7 +37,7 @@ const addPersonalPlant = async (req, res) => {
   if (!foundPlant) {
     // get the object that has the information we need
     // based on the query to USDA database
-    queryPlantDetails(sciName, async JSONobj => {
+    await queryPlantDetails(sciName, async JSONobj => {
       // Create a plant object
       const newPlant = await new Plant(JSONobj).save();
 
@@ -61,6 +64,9 @@ const addPersonalPlant = async (req, res) => {
 
   // get the garden id of the user
   let gId = user.gardenId;
+
+  console.log('\n\n\n\n USER ID: ' + userId);
+  //GARDEN ID: " + gId);
 
   const garden = await Garden.findById(gId);
   garden.plants.push(personalPlant);

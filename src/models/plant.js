@@ -17,11 +17,11 @@ const plantSchema = new mongoose.Schema({
     default: null,
   },
   moisture_use: {
-    type: Number,
+    type: String,
     default: null,
   },
   temperature: {
-    type: Number,
+    type: String,
     default: null,
   },
 });
