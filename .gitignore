@@ -6,4 +6,7 @@ package-lock.json
 # File for environment variables
 .env
 
+# Ignore prettier files too
+.prettierrc
+
 /*.jpg
