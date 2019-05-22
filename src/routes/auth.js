@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import mongodb from 'mongodb';
 import mongoose from 'mongoose';
 import mongodb from 'mongodb';
 import crypto from 'crypto';
@@ -7,8 +6,6 @@ import colors from 'colors';
 
 const User = mongoose.model('User');
 const Garden = mongoose.model('Garden');
-const ObjectId = mongodb.ObjectID;
-
 const ObjectId = mongodb.ObjectID;
 
 import {
