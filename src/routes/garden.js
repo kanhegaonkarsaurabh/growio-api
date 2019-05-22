@@ -2,24 +2,39 @@ import { Router } from 'express';
 import mongoose from 'mongoose';
 import { isAuthenticated } from '../config/authJwt';
 import { queryPlantDetails } from '../config/usda';
+import crypto from 'crypto';
+import mongodb from 'mongodb';
+
 const router = Router();
 
 const User = mongoose.model('User');
 const Plant = mongoose.model('Plant');
 const Garden = mongoose.model('Garden');
 const PersonalPlant = mongoose.model('PersonalPlant');
+const ObjectId = mongodb.ObjectID;
 
 const getPersonalPlants = async (req, res) => {
   // userId of the user who's authenticated right now .....
-  const userId = req.authData.userId;
-  const user = await User.findById(userId);
+
+  // User id of the current user
+  let userId = req.authData.userId;
+  const uidHash = crypto
+    .createHmac('sha256', userId.toString())
+    .digest('hex')
+    .slice(0, 24);
+
+  // console.log(req.authData);
+  const user = await User.findById(uidHash);
+
+  // const userId = req.authData.userId;
+  // const user = await User.findById(userId);
 
   /* NOTE: Uncomment after Add to MyGarden has been implemented */
-  // // get the garden id on this user
-  // const gardenId = user.gardenId;
-  // const garden = await req.context.models.Garden.findById(gardenId);
+  // get the garden id on this user
+  const gardenId = user.gardenId;
+  const garden = await req.context.models.Garden.findById(gardenId);
 
-  // return res.send(garden.plants);
+  return res.send(garden.plants);
 };
 
 const addPersonalPlant = async (req, res) => {
@@ -60,16 +75,25 @@ const addPersonalPlant = async (req, res) => {
 
   // User id of the current user
   let userId = req.authData.userId;
-  const user = User.findById(userId);
+  const uidHash = crypto
+    .createHmac('sha256', userId.toString())
+    .digest('hex')
+    .slice(0, 24);
+
+  // console.log(req.authData);
+  const user = await User.findById(uidHash);
+  console.log('\n\n\n\n user: ' + user._id);
 
   // get the garden id of the user
   let gId = user.gardenId;
 
-  console.log('\n\n\n\n USER ID: ' + userId);
   //GARDEN ID: " + gId);
 
   const garden = await Garden.findById(gId);
-  garden.plants.push(personalPlant);
+  console.log('\n\n GARDEN ID: ' + gId);
+
+  await garden.plants.push(personalPlant);
+
   garden.save(error => {
     if (error) {
       res
