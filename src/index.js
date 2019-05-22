@@ -2,9 +2,12 @@ import 'dotenv/config';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import express from 'express';
+import cron from 'node-cron';
 
 import models, { connectDb } from './models';
 import routes from './routes';
+
+import { setupPlantForTheWeek } from './utils/scrape';
 
 const app = express();
 
@@ -47,6 +50,9 @@ connectDb().then(async () => {
   if (eraseDatabaseOnSync) {
     await Promise.all([models.User.deleteMany({})]);
   }
+
+  // cron-job for web-scraping plant of the week and adding it to the database
+  cron.schedule('0 0 * * 1', setupPlantForTheWeek);
 
   app.listen(process.env.PORT, () =>
     console.log(`Example app listening on port ${process.env.PORT}!`),
