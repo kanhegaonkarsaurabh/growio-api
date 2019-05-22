@@ -52,17 +52,30 @@ const addPersonalPlant = async (req, res) => {
   if (!foundPlant) {
     // get the object that has the information we need
     // based on the query to USDA database
+    console.log('here bitch');
     await queryPlantDetails(sciName, async JSONobj => {
       // Create a plant object
       const newPlant = await new Plant(JSONobj).save();
 
       // TODO: put this plant into the database
-      Plant.push(newPlant);
+      await Plant.push(newPlant);
 
       // so that we can refer to it later on
-      foundPlant = newPlant;
+      // foundPlant = newPlant;
     });
+    console.log('here bitch2');
   }
+
+  //  TODO
+  // OK HOES WHAT'S HAPPENING IS THAT FOUND PLANT IS NULL AFTER THE FIRST TIME
+  // YOU RUN THE IF STATEMENT ABOVE. I THINK IT'S BECAUSE THE DATABASE ISN'T
+  // RELOADING? IS THAT A THING
+
+  // Plant = mongoose.model('Plant');
+
+  // find it again because i don't think line 63 is working -dar
+  foundPlant = await Plant.findOne({ scientificName: sciName });
+  console.log('\n\nwtf - ' + foundPlant);
   console.log('Found plant: ', foundPlant.id);
   console.log('Found plant: ', foundPlant);
   let plantId = foundPlant._id;

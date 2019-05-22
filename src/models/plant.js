@@ -24,6 +24,10 @@ const plantSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  sunlight: {
+    type: String,
+    default: null,
+  },
 });
 
 const Plant = mongoose.model('Plant', plantSchema);
