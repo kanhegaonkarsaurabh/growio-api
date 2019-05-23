@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
 import { isAuthenticated } from '../config/authJwt';
-import { uploadToCloudinary } from './plant';
+import { uploadToCloudinary, removeFromCloudinary } from './plant';
 const router = Router();
 
 const User = mongoose.model('User');
@@ -82,6 +82,14 @@ const removePersonalPlant = async (req, res) => {
   const currentUser = User.findById(req.authData.userId);
   let gId = user.gardenId;
   const garden = await Garden.findById(gId);
+
+  // extract the particular personalPlant to get image URL
+  const plant = await PersonalPlant.findOne({ nickname: nicknameToRemove });
+  const removeResult = removeFromCloudinary(plant.plant_url);
+
+  if (removeResult != 'ok') {
+    console.log('Failed to remove and/or find image in Cloudinary');
+  }
 
   // Remove the personalPlant
   garden.plants.pull({ nickname: nicknameToRemove });
