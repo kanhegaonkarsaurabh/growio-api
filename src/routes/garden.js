@@ -61,7 +61,7 @@ const addPersonalPlant = async (req, res) => {
       await Plant.push(newPlant);
 
       // so that we can refer to it later on
-      // foundPlant = newPlant;
+      foundPlant = newPlant;
     });
     console.log('here bitch2');
   }
@@ -74,15 +74,15 @@ const addPersonalPlant = async (req, res) => {
   // Plant = mongoose.model('Plant');
 
   // find it again because i don't think line 63 is working -dar
-  foundPlant = await Plant.findOne({ scientificName: sciName });
-  console.log('\n\nwtf - ' + foundPlant);
-  console.log('Found plant: ', foundPlant.id);
-  console.log('Found plant: ', foundPlant);
-  let plantId = foundPlant._id;
+  //foundPlant = await Plant.findOne({ scientificName: sciName });
+  //console.log('Found plant: ', foundPlant.id);
+  //console.log('Found plant: ', foundPlant);
+  //console.log('\n\nwtf - ' + foundPlant);
+  //let plantId = foundPlant._id;
 
   // Create the user's personal plant
   const personalPlant = await new PersonalPlant({
-    plant_id: plantId,
+    plant_id: foundPlant._id,
     nickname: nickname,
   }).save();
 
