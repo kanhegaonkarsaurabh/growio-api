@@ -96,7 +96,7 @@ const addPersonalPlant = async (req, res) => {
 
       garden.save(error => {
         if (error) {
-          resJson({ msg: `ERROR: Could not add ${sciName}-${nickname} plant in Garden` });
+          resJson({ msg: `ERROR: Could not add ${sciName}-${nickname} plant in Garden`, error: error });
           // .// writeHead(404)
         } else {
           console.log(`SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden`.green);
@@ -127,20 +127,27 @@ const removePersonalPlant = async (req, res) => {
   let gId = currentUser.gardenId;
   const garden = await Garden.findById(gId);
 
-  const plantToBeRemoved = await Garden.findOne({_id: gId, 'plants.nickname': nicknameToRemove}, {'plants.$': 1},);
-  console.log(`LOG: The plant to be removed from the garden: ${gId} is: `, plantToBeRemoved);
+  console.log('Passed in params:', nicknameToRemove);
+
+  // fetch the plant to be removed from PersonalPlant collection
+  const plantToBeRemoved = await PersonalPlant.findOneAndDelete({nickname: nicknameToRemove});
+
+  if (!plantToBeRemoved) {
+    console.log(`ERROR: Plant to be removed cannot be found in the PersonalPlant collection`.red, plantToBeRemoved);
+    res.status(404).send({ msg: `ERROR: Plant to be removed cannot be found in the PersonalPlant collection`, success: false });
+    return;   // weird function doesn't end by res
+  }
+
+  console.log(`LOG: Plant to be removed has been removed from the PersonalPlant collection`.yellow, plantToBeRemoved);
 
   // Remove the personalPlant
-  garden.plants.pull({ nickname: nicknameToRemove });
+  const updatedGarden = await garden.plants.pull(plantToBeRemoved._id);
   garden.save(error => {
     if (error) {
-      res
-        .sendStatus(404)
-        .send({ msg: `ERROR: Could not find ${nicknameToRemove} plant in Garden` });
+      res.status(404).send({ msg: `ERROR: Could not find ${nicknameToRemove} plant in Garden`, error: error, success: false });
     } else {
-      res
-        .sendStatus(200)
-        .send({ msg: `SUCCESS: Successfully removed ${nicknameToRemove} plant from Garden` });
+      console.log(`SUCCESS: Plant to be removed has been removed from the PersonalPlant collection`.green, plantToBeRemoved);
+      res.status(200).send({ msg: `SUCCESS: Successfully removed ${nicknameToRemove} plant from Garden`, success: true });
     }
   });
 };

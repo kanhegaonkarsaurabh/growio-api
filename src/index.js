@@ -15,7 +15,6 @@ const PersonalPlant = mongoose.model('PersonalPlant');
 const app = express();
 
 // Application-Level Middleware
-
 app.use(cors());
 
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -39,7 +38,6 @@ app.use(async (req, res, next) => {
 });
 
 // Routes
-
 app.use('/users', routes.user);
 app.use('/auth', routes.auth);
 app.use('/garden', routes.garden);
