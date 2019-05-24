@@ -27,7 +27,7 @@ const getPersonalPlants = async (req, res) => {
 
   // console.log(req.authData);
   const user = await User.findById(uidHash);
-
+  console.log('this is the user: ', uidHash);
   // const userId = req.authData.userId;
   // const user = await User.findById(userId);
 
@@ -36,7 +36,7 @@ const getPersonalPlants = async (req, res) => {
   const gardenId = user.gardenId;
   const garden = await req.context.models.Garden.findById(gardenId);
 
-  return res.send(garden.plants);
+  return res.json(garden.plants);
 };
 
 const findPlantHelper = async (sciName) => {
@@ -59,11 +59,11 @@ const addPersonalPlant = async (req, res) => {
   const nickname = req.body.nickname;
 
   findPlantHelper(sciName)
-    .then((foundPlant) => { return {resJson: res.json.bind(res), foundPlant: foundPlant} })
+    .then((foundPlant) => { return { resJson: res.json.bind(res), foundPlant: foundPlant } })
     .then(async function (utilObj) {
-      const {resJson, foundPlant} = utilObj;
+      const { resJson, foundPlant } = utilObj;
       const addedPlant = await new Plant(foundPlant).save();
-      
+
       console.log(`LOG: Following plant added to db in Plants collection`.yellow, addedPlant);
 
       // Create the user's personal plant
@@ -97,11 +97,11 @@ const addPersonalPlant = async (req, res) => {
       garden.save(error => {
         if (error) {
           resJson({ msg: `ERROR: Could not add ${sciName}-${nickname} plant in Garden` });
-            // .// writeHead(404)
+          // .// writeHead(404)
         } else {
           console.log(`SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden`.green);
           resJson({ msg: `SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden` });
-            // .writeHead(200)
+          // .writeHead(200)
         }
       });
     });
@@ -112,13 +112,23 @@ const addPersonalPlant = async (req, res) => {
 const removePersonalPlant = async (req, res) => {
   // get the id of the personalPlant to remove
   let nicknameToRemove;
-  if (req.body && req.body.data) {
-    nicknameToRemove = req.body.data.nickname;
+  if (req.body) {
+    nicknameToRemove = req.body.nickname;
   }
 
-  const currentUser = User.findById(req.authData.userId);
-  let gId = user.gardenId;
+  // User id of the current user
+  let userId = req.authData.userId;
+  const uidHash = crypto
+    .createHmac('sha256', userId.toString())
+    .digest('hex')
+    .slice(0, 24);
+
+  const currentUser = await User.findById(uidHash);
+  let gId = currentUser.gardenId;
   const garden = await Garden.findById(gId);
+
+  const plantToBeRemoved = await Garden.findOne({_id: gId, 'plants.nickname': nicknameToRemove}, {'plants.$': 1},);
+  console.log(`LOG: The plant to be removed from the garden: ${gId} is: `, plantToBeRemoved);
 
   // Remove the personalPlant
   garden.plants.pull({ nickname: nicknameToRemove });
