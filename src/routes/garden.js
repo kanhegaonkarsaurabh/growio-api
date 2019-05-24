@@ -5,6 +5,7 @@ import { queryPlantDetails } from '../config/usda';
 import crypto from 'crypto';
 import mongodb from 'mongodb';
 import { resolve } from 'url';
+import colors from 'colors';
 
 const router = Router();
 
@@ -43,10 +44,12 @@ const findPlantHelper = async (sciName) => {
   if (!plant) {
     const newPlant = await queryPlantDetails(sciName);
     if (newPlant) {
+      console.log('LOG: Following plant queried from USDA API: '.yellow, newPlant);
       return newPlant
     }
     return null;    // weird
   }
+  console.log(`Plant: ${sciName} found in the local db in Plants collection`.yellow);
   return new Promise(resolve => resolve(plant));    // Returns a promise to match type of the 'return newPlant' statement
 }
 
@@ -58,18 +61,18 @@ const addPersonalPlant = async (req, res) => {
   findPlantHelper(sciName)
     .then((foundPlant) => { return {resJson: res.json.bind(res), foundPlant: foundPlant} })
     .then(async function (utilObj) {
-      // console.log('this is done', utilObj.resJson);
       const {resJson, foundPlant} = utilObj;
-      console.log('This is the found plant: ', foundPlant);
       const addedPlant = await new Plant(foundPlant).save();
-
-      console.log('Plant added: ', addedPlant);
+      
+      console.log(`LOG: Following plant added to db in Plants collection`.yellow, addedPlant);
 
       // Create the user's personal plant
       const personalPlant = await new PersonalPlant({
         plant_id: addedPlant._id,
         nickname: nickname,
       }).save();
+
+      console.log(`LOG: Following personalPlant added to db in PersonalPlants collection`.yellow, personalPlant);
 
       // User id of the current user
       let userId = req.authData.userId;
@@ -85,18 +88,18 @@ const addPersonalPlant = async (req, res) => {
       // get the garden id of the user
       let gId = user.gardenId;
 
-      //GARDEN ID: " + gId);
-
       const garden = await Garden.findById(gId);
       console.log('\n\n GARDEN ID: ' + gId);
 
       await garden.plants.push(personalPlant);
+      console.log(`LOG: Following PersonalPlant added to user: ${user._id}'s Garden: ${gId}`.yellow, personalPlant);
 
       garden.save(error => {
         if (error) {
           resJson({ msg: `ERROR: Could not add ${sciName}-${nickname} plant in Garden` });
             // .// writeHead(404)
         } else {
+          console.log(`SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden`.green);
           resJson({ msg: `SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden` });
             // .writeHead(200)
         }
