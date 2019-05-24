@@ -4,7 +4,13 @@ import bodyParser from 'body-parser';
 import express from 'express';
 
 import models, { connectDb } from './models';
+import mongoose from 'mongoose';
 import routes from './routes';
+
+const User = mongoose.model('User');
+const Plant = mongoose.model('Plant');
+const Garden = mongoose.model('Garden');
+const PersonalPlant = mongoose.model('PersonalPlant');
 
 const app = express();
 
@@ -46,7 +52,7 @@ const eraseDatabaseOnSync = process.env.DB_ERASE === 'yes';
 connectDb().then(async () => {
   // connect mongodb to our backend app
   if (eraseDatabaseOnSync) {
-    await Promise.all([models.User.deleteMany({})]);
+    await Promise.all([User.deleteMany({}), Garden.deleteMany({}), Plant.deleteMany({}), PersonalPlant.deleteMany({})]);
   }
 
   app.listen(process.env.PORT, () =>

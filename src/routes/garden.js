@@ -4,6 +4,7 @@ import { isAuthenticated } from '../config/authJwt';
 import { queryPlantDetails } from '../config/usda';
 import crypto from 'crypto';
 import mongodb from 'mongodb';
+import { resolve } from 'url';
 
 const router = Router();
 
@@ -37,87 +38,72 @@ const getPersonalPlants = async (req, res) => {
   return res.send(garden.plants);
 };
 
+const findPlantHelper = async (sciName) => {
+  const plant = await Plant.findOne({ scientificName: sciName });
+  if (!plant) {
+    const newPlant = await queryPlantDetails(sciName);
+    if (newPlant) {
+      return newPlant
+    }
+    return null;    // weird
+  }
+  return new Promise(resolve => resolve(plant));    // Returns a promise to match type of the 'return newPlant' statement
+}
+
 const addPersonalPlant = async (req, res) => {
   // Extract scientific name of plant from request
-
-  console.log('i hate s, ', req.body);
-
   const sciName = req.body.sciName;
   const nickname = req.body.nickname;
 
-  // check if the plant exists in the plant collection
-  let foundPlant = await Plant.findOne({ scientificName: sciName });
+  findPlantHelper(sciName)
+    .then((foundPlant) => { return {resJson: res.json.bind(res), foundPlant: foundPlant} })
+    .then(async function (utilObj) {
+      // console.log('this is done', utilObj.resJson);
+      const {resJson, foundPlant} = utilObj;
+      console.log('This is the found plant: ', foundPlant);
+      const addedPlant = await new Plant(foundPlant).save();
 
-  // if not found, add to plant collection
-  if (!foundPlant) {
-    // get the object that has the information we need
-    // based on the query to USDA database
-    console.log('here bitch');
-    await queryPlantDetails(sciName, async JSONobj => {
-      // Create a plant object
-      const newPlant = await new Plant(JSONobj).save();
+      console.log('Plant added: ', addedPlant);
 
-      // TODO: put this plant into the database
-      await Plant.push(newPlant);
+      // Create the user's personal plant
+      const personalPlant = await new PersonalPlant({
+        plant_id: addedPlant._id,
+        nickname: nickname,
+      }).save();
 
-      // so that we can refer to it later on
-      foundPlant = newPlant;
+      // User id of the current user
+      let userId = req.authData.userId;
+      const uidHash = crypto
+        .createHmac('sha256', userId.toString())
+        .digest('hex')
+        .slice(0, 24);
+
+      // console.log(req.authData);
+      const user = await User.findById(uidHash);
+      console.log('\n\n\n\n user: ' + user._id);
+
+      // get the garden id of the user
+      let gId = user.gardenId;
+
+      //GARDEN ID: " + gId);
+
+      const garden = await Garden.findById(gId);
+      console.log('\n\n GARDEN ID: ' + gId);
+
+      await garden.plants.push(personalPlant);
+
+      garden.save(error => {
+        if (error) {
+          resJson({ msg: `ERROR: Could not add ${sciName}-${nickname} plant in Garden` });
+            // .// writeHead(404)
+        } else {
+          resJson({ msg: `SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden` });
+            // .writeHead(200)
+        }
+      });
     });
-    console.log('here bitch2');
-  }
 
-  //  TODO
-  // OK HOES WHAT'S HAPPENING IS THAT FOUND PLANT IS NULL AFTER THE FIRST TIME
-  // YOU RUN THE IF STATEMENT ABOVE. I THINK IT'S BECAUSE THE DATABASE ISN'T
-  // RELOADING? IS THAT A THING
 
-  // Plant = mongoose.model('Plant');
-
-  // find it again because i don't think line 63 is working -dar
-  //foundPlant = await Plant.findOne({ scientificName: sciName });
-  //console.log('Found plant: ', foundPlant.id);
-  //console.log('Found plant: ', foundPlant);
-  //console.log('\n\nwtf - ' + foundPlant);
-  //let plantId = foundPlant._id;
-
-  // Create the user's personal plant
-  const personalPlant = await new PersonalPlant({
-    plant_id: foundPlant._id,
-    nickname: nickname,
-  }).save();
-
-  // User id of the current user
-  let userId = req.authData.userId;
-  const uidHash = crypto
-    .createHmac('sha256', userId.toString())
-    .digest('hex')
-    .slice(0, 24);
-
-  // console.log(req.authData);
-  const user = await User.findById(uidHash);
-  console.log('\n\n\n\n user: ' + user._id);
-
-  // get the garden id of the user
-  let gId = user.gardenId;
-
-  //GARDEN ID: " + gId);
-
-  const garden = await Garden.findById(gId);
-  console.log('\n\n GARDEN ID: ' + gId);
-
-  await garden.plants.push(personalPlant);
-
-  garden.save(error => {
-    if (error) {
-      res
-        .sendStatus(404)
-        .send({ msg: `ERROR: Could not add ${sciName}-${nickname} plant in Garden` });
-    } else {
-      res
-        .sendStatus(200)
-        .send({ msg: `SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden` });
-    }
-  });
 };
 
 const removePersonalPlant = async (req, res) => {

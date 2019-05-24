@@ -1,37 +1,16 @@
-const queryPlantDetails = (sciName, callback) => {
-  // Darya, Priyal, Grace fill codeeeeee
-  var request = require('request');
+import request from 'request';
+import mongoose from 'mongoose';
 
-  /*
-  scientificName: sciName,
-        commonName: commonName,
-        moisture_use: moistureUse,
-        sunlight: sunLight,
-        temperature: tempMin,*/
+const Plant = mongoose.model('Plant');
 
-  // default values TODO change if necessary there are temp
-  var _DEFAULT_MOISTURE = 'Medium';
-  var _DEFAULT_SUN = 'Partial';
-  var _DEFAULT_TEMP = '40';
+function externalUsdaRequest(url, qs, sciName) {
+  return new Promise(resolve => {
+    request({ url: url, qs: qs }, function (err, response, body) {
+      // default values TODO change if necessary there are temp
+      const _DEFAULT_MOISTURE = 'Medium';
+      const _DEFAULT_SUN = 'Partial';
+      const _DEFAULT_TEMP = '40';
 
-  // getting the genus and species based on the scientific name
-  var arr = sciName.split(' ');
-  var genus = arr[0];
-  var species = arr[1];
-
-  var plantDBurl = 'https://plantsdb.xyz/search?';
-  var queryObject = {
-    Genus: genus,
-    Species: species,
-    limit: 1,
-  };
-
-  request(
-    {
-      url: plantDBurl,
-      qs: queryObject,
-    },
-    async function(error, response, body) {
       // get the data we need in JSON format
       console.log('\n\n\n\n' + body);
       var obj = JSON.parse(body);
@@ -68,9 +47,34 @@ const queryPlantDetails = (sciName, callback) => {
 
       // console.log(thing);
 
-      callback(JSONobj);
-    },
-  );
+      resolve(JSONobj);
+    });
+  });
+}
+
+
+
+const queryPlantDetails = async (sciName) => {
+  /*
+  scientificName: sciName,
+        commonName: commonName,
+        moisture_use: moistureUse,
+        sunlight: sunLight,
+        temperature: tempMin,*/
+
+  // getting the genus and species based on the scientific name
+  var arr = sciName.split(' ');
+  var genus = arr[0];
+  var species = arr[1];
+
+  var plantDBurl = 'https://plantsdb.xyz/search?';
+  var queryObject = {
+    Genus: genus,
+    Species: species,
+    limit: 1,
+  };
+
+  return await externalUsdaRequest(plantDBurl, queryObject, sciName);
 };
 
 export { queryPlantDetails };
