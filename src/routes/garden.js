@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import mongodb from 'mongodb';
 import { resolve } from 'url';
 import colors from 'colors';
+import { uniqueObjectIdHash } from '../config/util';
 
 const router = Router();
 
@@ -20,10 +21,7 @@ const getPersonalPlants = async (req, res) => {
 
   // User id of the current user
   let userId = req.authData.userId;
-  const uidHash = crypto
-    .createHmac('sha256', userId.toString())
-    .digest('hex')
-    .slice(0, 24);
+  const uidHash = uniqueObjectIdHash(userId.toString());
 
   // console.log(req.authData);
   const user = await User.findById(uidHash);
@@ -59,37 +57,40 @@ const addPersonalPlant = async (req, res) => {
   const nickname = req.body.nickname;
 
   findPlantHelper(sciName)
-    .then((foundPlant) => { return { resJson: res.bind(res), foundPlant: foundPlant } })
+    .then((foundPlant) => { return { resEnd: res.end.bind(res), resSend: res.send.bind(res), resStatus: res.status.bind(res), resWriteHead: res.writeHead.bind(res), foundPlant: foundPlant } })
     .then(async function (utilObj) {
-      const { resJson, foundPlant } = utilObj;
+      const { resStatus, resEnd, resSend, foundPlant, resWriteHead } = utilObj;
       const addedPlant = await new Plant(foundPlant).save();
 
       console.log(`LOG: Following plant added to db in Plants collection`.yellow, addedPlant);
 
+      console.log(`LOG: Following personalPlant added to db in PersonalPlants collection`.yellow, personalPlant);
+
+      // User id of the current user
+      let userId = req.authData.userId;
+      const uidHash = uniqueObjectIdHash(userId.toString());
+
+      // console.log(req.authData);
+      const user = await User.findById(uidHash);
+      console.log('\n\n\n\n user: ' + user._id);
+
+      // Create the unique nickname key by adding nickname + user_id
+      let uniqueNicknameKey = uniqueObjectIdHash(nickname + (user._id.toString()));
       let personalPlant;
       try {
         // Create the user's personal plant
         personalPlant = await new PersonalPlant({
           plant_id: addedPlant._id,
           nickname: nickname,
+          nickname_key: new ObjectId(uniqueNicknameKey)
         }).save();
       } catch (e) {
         console.log(`ERROR: Could not add ${nickname} plant to PersonalPlant collection`, e);
-        resJson.status(404).send({success: false, msg: `ERROR: Could not add PersonalPlant because the current nickname: ${nickname} already exists`});
+        resStatus(404);
+        resSend({success: false, msg: `ERROR: Could not add PersonalPlant because the current nickname: ${nickname} already exists`});
+        //resEnd();
+        return;
       }
-
-      console.log(`LOG: Following personalPlant added to db in PersonalPlants collection`.yellow, personalPlant);
-
-      // User id of the current user
-      let userId = req.authData.userId;
-      const uidHash = crypto
-        .createHmac('sha256', userId.toString())
-        .digest('hex')
-        .slice(0, 24);
-
-      // console.log(req.authData);
-      const user = await User.findById(uidHash);
-      console.log('\n\n\n\n user: ' + user._id);
 
       // get the garden id of the user
       let gId = user.gardenId;
@@ -102,11 +103,17 @@ const addPersonalPlant = async (req, res) => {
 
       garden.save(error => {
         if (error) {
-          resJson({ msg: `ERROR: Could not add ${sciName}-${nickname} plant in Garden`, error: error });
+          resStatus(404);
+          resSend({ msg: `ERROR: Could not add ${sciName}-${nickname} plant in Garden`, error: error });
+          //resEnd();
+          return;
           // .// writeHead(404)
         } else {
           console.log(`SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden`.green);
-          resJson({ msg: `SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden` });
+          resStatus(200);
+          resSend({ msg: `SUCCESS: Successfully added ${sciName}-${nickname} plant to Garden` });
+          //resEnd();
+          return;
           // .writeHead(200)
         }
       });
@@ -135,8 +142,11 @@ const removePersonalPlant = async (req, res) => {
 
   console.log('Passed in params:', nicknameToRemove);
 
+  // Generate the unique nickname_key that we can use to query personalPlant
+  const uniqueNicknameKey = uniqueObjectIdHash(nicknameToRemove + currentUser._id.toString()); 
+
   // fetch the plant to be removed from PersonalPlant collection
-  const plantToBeRemoved = await PersonalPlant.findOneAndDelete({ nickname: nicknameToRemove });
+  const plantToBeRemoved = await PersonalPlant.findOneAndDelete({ nickname_key: new ObjectId(uniqueNicknameKey) });
 
   if (!plantToBeRemoved) {
     console.log(`ERROR: Plant to be removed cannot be found in the PersonalPlant collection`.red, plantToBeRemoved);

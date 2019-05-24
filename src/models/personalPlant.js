@@ -9,6 +9,11 @@ export const personalPlantSchema = new mongoose.Schema({
     type: String,
     default: null, 
   },
+  nickname_key: {   // Unique key for a personal plant. This is nickname + user_id
+    type: mongoose.Schema.ObjectId, 
+    unique: true,
+    sparse: true,   // Make this unique but ignore similar 'null' values 
+  }
 });
 
 export const PersonalPlant = mongoose.model('PersonalPlant', personalPlantSchema);
