@@ -59,18 +59,24 @@ const addPersonalPlant = async (req, res) => {
   const nickname = req.body.nickname;
 
   findPlantHelper(sciName)
-    .then((foundPlant) => { return { resJson: res.json.bind(res), foundPlant: foundPlant } })
+    .then((foundPlant) => { return { resJson: res.bind(res), foundPlant: foundPlant } })
     .then(async function (utilObj) {
       const { resJson, foundPlant } = utilObj;
       const addedPlant = await new Plant(foundPlant).save();
 
       console.log(`LOG: Following plant added to db in Plants collection`.yellow, addedPlant);
 
-      // Create the user's personal plant
-      const personalPlant = await new PersonalPlant({
-        plant_id: addedPlant._id,
-        nickname: nickname,
-      }).save();
+      let personalPlant;
+      try {
+        // Create the user's personal plant
+        personalPlant = await new PersonalPlant({
+          plant_id: addedPlant._id,
+          nickname: nickname,
+        }).save();
+      } catch (e) {
+        console.log(`ERROR: Could not add ${nickname} plant to PersonalPlant collection`, e);
+        resJson.status(404).send({success: false, msg: `ERROR: Could not add PersonalPlant because the current nickname: ${nickname} already exists`});
+      }
 
       console.log(`LOG: Following personalPlant added to db in PersonalPlants collection`.yellow, personalPlant);
 
@@ -130,7 +136,7 @@ const removePersonalPlant = async (req, res) => {
   console.log('Passed in params:', nicknameToRemove);
 
   // fetch the plant to be removed from PersonalPlant collection
-  const plantToBeRemoved = await PersonalPlant.findOneAndDelete({nickname: nicknameToRemove});
+  const plantToBeRemoved = await PersonalPlant.findOneAndDelete({ nickname: nicknameToRemove });
 
   if (!plantToBeRemoved) {
     console.log(`ERROR: Plant to be removed cannot be found in the PersonalPlant collection`.red, plantToBeRemoved);

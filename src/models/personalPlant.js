@@ -7,7 +7,7 @@ export const personalPlantSchema = new mongoose.Schema({
   },
   nickname: {
     type: String,
-    default: null, // will by default be the common name of the plant
+    default: null, 
   },
 });
 
