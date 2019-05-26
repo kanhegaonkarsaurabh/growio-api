@@ -187,6 +187,13 @@ const updateNickname = async (req, res) => {
   if (req.body) {
     oldNickname = req.body.oldNickname;
     newNickname = req.body.newNickname;
+
+    // Initial check to see that oldNickname and newNickname is not the same
+    if (oldNickname === newNickname) {
+      res.status(200);
+      res.send({msg: 'ERROR: oldNickname and newNickname cannot be the same', success: false});
+      return;
+    }
   }
 
   // User id of the current user
@@ -206,21 +213,13 @@ const updateNickname = async (req, res) => {
   const plantToBeUpdated = await PersonalPlant.findOne({ nickname_key: new ObjectId(oldUniqueNicknameKey) });
 
   if (!plantToBeUpdated) {
-    console.log(`ERROR: Nickname of the Plant to be updates cannot be found in the PersonalPlant collection`.red, plantToBeRemoved);
+    console.log(`ERROR: Nickname of the Plant to be updated cannot be found in the PersonalPlant collection`.red);
     res.status(404).send({ msg: `Nickname of the Plant to be updates cannot be found in the PersonalPlant collection`, success: false });
     return;   // weird function doesn't end by res
   }
 
   // Remove the personalPlant with old nickname from the user's garden first
   const updatedGarden = await garden.plants.pull(plantToBeUpdated._id);
-  garden.save(error => {
-    if (error) {
-      res.status(404).send({ msg: `ERROR: Could not find ${oldNickname} plant in Garden`, error: error, success: false });
-    } else {
-      console.log(`SUCCESS: Plant to be updated has been removed (with the old nicknames) from the Garden collection`.green, plantToBeUpdated);
-      res.status(200).send({ msg: `SUCCESS: Successfully removed ${oldNickname} plant from Garden`, success: true });
-    }
-  });
 
   // Generate a new nickname key on the basis of the new nickname to user wants
   const newUniqueNicknameKey = uniqueObjectIdHash(newNickname + currentUser._id.toString());
@@ -228,25 +227,25 @@ const updateNickname = async (req, res) => {
   // Update the plant with the new nickname in the PersonalPlant collection
   const updatedPersonalPlant = await PersonalPlant.findOneAndUpdate(
     {_id: plantToBeUpdated._id},  // find it using _id and not nickname because we're updating nickname. Thus, avoid clashes
-    {$set:{nickname_key: new ObjectId(newUniqueNicknameKey)}}
-    , {new: true});
+    {$set:{nickname_key: new ObjectId(newUniqueNicknameKey), nickname: newNickname}}, 
+    {upsert: true, new: true});
 
   // Push this new personalPlant to the user's garden and send the user the updated garden
   const newGarden = await garden.plants.push(updatedPersonalPlant);
 
-  console.log(`LOG: Following PersonalPlant with updated nickname added to user: ${user._id}'s Garden: ${gId}`.yellow, updatedPersonalPlant);
+  console.log(`LOG: Following PersonalPlant with updated nickname added to user: ${currentUser._id}'s Garden: ${gId}`.yellow, updatedPersonalPlant);
 
   garden.save(error => {
     if (error) {
-      resStatus(404);
-      resSend({ msg: `ERROR: Could not add ${oldNickname} plant in Garden`, error: error });
+      res.status(404);
+      res.send({ msg: `ERROR: Could not add ${oldNickname} plant in Garden`, error: error, success: false });
       //resEnd();
       return;
       // .// writeHead(404)
     } else {
       console.log(`SUCCESS: Successfully updated nickname:${oldNickname} with ${newNickname} for plant ${plantToBeUpdated._id} in user's garden`.green);
-      resStatus(200);
-      resSend({ msg: `Successfully updated nickname:${oldNickname} with ${newNickname} for plant ${plantToBeUpdated._id} in user's garden`, garden: newGarden });
+      res.status(200);
+      res.send({ msg: `Successfully updated nickname:${oldNickname} with ${newNickname} for plant ${plantToBeUpdated._id} in user's garden`, garden: newGarden, success: true });
       //resEnd();
       return;
       // .writeHead(200)
