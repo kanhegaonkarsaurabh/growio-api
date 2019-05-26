@@ -41,7 +41,7 @@ const getGoogleAccountFromCode = async code => {
 
   var options = {
     uri: 'https://www.googleapis.com/oauth2/v2/userinfo',
-    qs: { oauth_token: tokens.access_token },
+    qs: { oauth_token: tokens.access_token, access_type: 'offline' },
     headers: {
       'User-Agent': 'Request-Promise',
     },

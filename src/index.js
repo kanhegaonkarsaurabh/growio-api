@@ -5,14 +5,19 @@ import express from 'express';
 import cron from 'node-cron';
 
 import models, { connectDb } from './models';
+import mongoose from 'mongoose';
 import routes from './routes';
 
-import { setupPlantForTheWeek } from './utils/scrape';
 
+const User = mongoose.model('User');
+const Plant = mongoose.model('Plant');
+const Garden = mongoose.model('Garden');
+const PersonalPlant = mongoose.model('PersonalPlant');
+
+import { setupPlantForTheWeek } from './utils/scrape';
 const app = express();
 
 // Application-Level Middleware
-
 app.use(cors());
 
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -36,11 +41,11 @@ app.use(async (req, res, next) => {
 });
 
 // Routes
-
 app.use('/users', routes.user);
 app.use('/auth', routes.auth);
 app.use('/garden', routes.garden);
 app.use('/plant', routes.plant);
+app.use('/usda', routes.usda);
 
 // Toggle this only when you want to clean and reset the db completely on start
 const eraseDatabaseOnSync = process.env.DB_ERASE === 'yes';
@@ -48,7 +53,7 @@ const eraseDatabaseOnSync = process.env.DB_ERASE === 'yes';
 connectDb().then(async () => {
   // connect mongodb to our backend app
   if (eraseDatabaseOnSync) {
-    await Promise.all([models.User.deleteMany({})]);
+    await Promise.all([User.deleteMany({}), Garden.deleteMany({}), Plant.deleteMany({}), PersonalPlant.deleteMany({})]);
   }
 
   // cron-job for web-scraping plant of the week and adding it to the database

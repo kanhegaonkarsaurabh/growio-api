@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
+import mongodb from 'mongodb';
+import crypto from 'crypto';
+import colors from 'colors';
+
 const User = mongoose.model('User');
+const Garden = mongoose.model('Garden');
+const ObjectId = mongodb.ObjectID;
 
 import {
   createConnection,
@@ -26,6 +32,10 @@ const loginWithGoogle = async (req, res) => {
 };
 
 const addToDb = async profile => {
+  console.log(
+    `LOG: Adding user: ${profile.id} to the database and creating his garden`.yellow,
+    profile,
+  );
   const uidHash = crypto
     .createHmac('sha256', profile.id.toString())
     .digest('hex')
@@ -34,10 +44,16 @@ const addToDb = async profile => {
   // check if user already exists
   const currentUser = await User.findOne({ _id: new ObjectId(uidHash) });
   if (!currentUser) {
+    // Create a new garden for the user
+    const garden = await new Garden({
+      name: `${profile.name}'s Garden`,
+    }).save();
+
     // register user and return
     const newUser = await new User({
       email: profile.email,
       _id: new ObjectId(uidHash),
+      gardenId: garden._id,
       name: profile.name,
     }).save();
   }
