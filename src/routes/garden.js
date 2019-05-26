@@ -88,8 +88,11 @@ const addPersonalPlant = async (req, res) => {
       let personalPlant;
       try {
 
+        const plantUrl = null;
         // Upload plant image to cloudinary and retrieve the url
-        const plantUrl = uploadToCloudinary(imageUrl);
+        if (imageUrl) {
+          plantUrl = uploadToCloudinary(imageUrl);
+        }
 
         // Create the user's personal plant
         personalPlant = await new PersonalPlant({
