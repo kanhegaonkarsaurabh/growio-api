@@ -13,7 +13,11 @@ export const personalPlantSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId, 
     unique: true,
     sparse: true,   // Make this unique but ignore similar 'null' values 
-  }
+  },
+  plant_image: {
+    type: String,
+    default: null,
+  },
 });
 
 export const PersonalPlant = mongoose.model('PersonalPlant', personalPlantSchema);
