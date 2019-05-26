@@ -4,36 +4,14 @@ import mongoose from 'mongoose';
 //import { request } from 'https';
 import reqPromise from 'request-promise';
 
-const cloudinary = require('cloudinary').v2;
-
 const router = Router();
 
 // plantOfTheWeek model
 const PlantOfTheWeek = mongoose.model('PlantOfTheWeek');
 
-// cloudinary API configuration
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUDNAME,
-  api_key: process.env.CLOUDINARY_APIKEY,
-  api_secret: process.env.CLOUDINARY_APISECRET,
-});
-
 // Sleeps the execution of the function
 const sleep = milliseconds => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
-};
-
-export const uploadToCloudinary = imageUrl => {
-  cloudinary.uploader.upload(
-    imageUrl,
-    { folder: 'plants_identify', width: 500, height: 500, crop: 'limit' },
-    function(err, image) {
-      if (err) {
-        console.log(err);
-      }
-      return image.url;
-    },
-  );
 };
 
 const identifyOptions = encImage => {
