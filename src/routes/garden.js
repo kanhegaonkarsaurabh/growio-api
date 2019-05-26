@@ -37,6 +37,12 @@ const getPersonalPlants = async (req, res) => {
   return res.json(garden.plants);
 };
 
+router
+  .route('/plants')
+  .all(isAuthenticated)
+  .get(getPersonalPlants);
+
+
 const findPlantHelper = async (sciName) => {
   const plant = await Plant.findOne({ scientificName: sciName });
   if (!plant) {
@@ -87,7 +93,7 @@ const addPersonalPlant = async (req, res) => {
       } catch (e) {
         console.log(`ERROR: Could not add ${nickname} plant to PersonalPlant collection`, e);
         resStatus(404);
-        resSend({success: false, msg: `ERROR: Could not add PersonalPlant because the current nickname: ${nickname} already exists`});
+        resSend({ success: false, msg: `ERROR: Could not add PersonalPlant because the current nickname: ${nickname} already exists` });
         //resEnd();
         return;
       }
@@ -143,7 +149,7 @@ const removePersonalPlant = async (req, res) => {
   console.log('Passed in params:', nicknameToRemove);
 
   // Generate the unique nickname_key that we can use to query personalPlant
-  const uniqueNicknameKey = uniqueObjectIdHash(nicknameToRemove + currentUser._id.toString()); 
+  const uniqueNicknameKey = uniqueObjectIdHash(nicknameToRemove + currentUser._id.toString());
 
   // fetch the plant to be removed from PersonalPlant collection
   const plantToBeRemoved = await PersonalPlant.findOneAndDelete({ nickname_key: new ObjectId(uniqueNicknameKey) });
@@ -169,14 +175,89 @@ const removePersonalPlant = async (req, res) => {
 };
 
 router
-  .route('/plants')
-  .all(isAuthenticated)
-  .get(getPersonalPlants);
-
-router
   .route('/plant')
   .all(isAuthenticated)
   .post(addPersonalPlant)
   .delete(removePersonalPlant);
+
+
+const updateNickname = async (req, res) => {
+  // get the id of the personalPlant to remove
+  let oldNickname, newNickname;
+  if (req.body) {
+    oldNickname = req.body.oldNickname;
+    newNickname = req.body.newNickname;
+  }
+
+  // User id of the current user
+  let userId = req.authData.userId;
+  const uidHash = uniqueObjectIdHash(userId.toString());
+
+  const currentUser = await User.findById(uidHash);
+  let gId = currentUser.gardenId;
+  const garden = await Garden.findById(gId);
+
+  console.log('Passed in params:', oldNickname, newNickname);
+
+  // Generate the unique nickname_key that we can use to query the old (not updated) personalplant
+  const oldUniqueNicknameKey = uniqueObjectIdHash(oldNickname + currentUser._id.toString());
+
+  // fetch the plant to be removed from PersonalPlant collection
+  const plantToBeUpdated = await PersonalPlant.findOne({ nickname_key: new ObjectId(oldUniqueNicknameKey) });
+
+  if (!plantToBeUpdated) {
+    console.log(`ERROR: Nickname of the Plant to be updates cannot be found in the PersonalPlant collection`.red, plantToBeRemoved);
+    res.status(404).send({ msg: `Nickname of the Plant to be updates cannot be found in the PersonalPlant collection`, success: false });
+    return;   // weird function doesn't end by res
+  }
+
+  // Remove the personalPlant with old nickname from the user's garden first
+  const updatedGarden = await garden.plants.pull(plantToBeUpdated._id);
+  garden.save(error => {
+    if (error) {
+      res.status(404).send({ msg: `ERROR: Could not find ${oldNickname} plant in Garden`, error: error, success: false });
+    } else {
+      console.log(`SUCCESS: Plant to be updated has been removed (with the old nicknames) from the Garden collection`.green, plantToBeUpdated);
+      res.status(200).send({ msg: `SUCCESS: Successfully removed ${oldNickname} plant from Garden`, success: true });
+    }
+  });
+
+  // Generate a new nickname key on the basis of the new nickname to user wants
+  const newUniqueNicknameKey = uniqueObjectIdHash(newNickname + currentUser._id.toString());
+
+  // Update the plant with the new nickname in the PersonalPlant collection
+  const updatedPersonalPlant = await PersonalPlant.findOneAndUpdate(
+    {_id: plantToBeUpdated._id},  // find it using _id and not nickname because we're updating nickname. Thus, avoid clashes
+    {$set:{nickname_key: new ObjectId(newUniqueNicknameKey)}}
+    , {new: true});
+
+  // Push this new personalPlant to the user's garden and send the user the updated garden
+  const newGarden = await garden.plants.push(updatedPersonalPlant);
+
+  console.log(`LOG: Following PersonalPlant with updated nickname added to user: ${user._id}'s Garden: ${gId}`.yellow, updatedPersonalPlant);
+
+  garden.save(error => {
+    if (error) {
+      resStatus(404);
+      resSend({ msg: `ERROR: Could not add ${oldNickname} plant in Garden`, error: error });
+      //resEnd();
+      return;
+      // .// writeHead(404)
+    } else {
+      console.log(`SUCCESS: Successfully updated nickname:${oldNickname} with ${newNickname} for plant ${plantToBeUpdated._id} in user's garden`.green);
+      resStatus(200);
+      resSend({ msg: `Successfully updated nickname:${oldNickname} with ${newNickname} for plant ${plantToBeUpdated._id} in user's garden`, garden: newGarden });
+      //resEnd();
+      return;
+      // .writeHead(200)
+    }
+  });
+}
+
+// Adding another route to make it more clear
+router
+  .route('/plant/nickname')
+  .all(isAuthenticated)
+  .put(updateNickname)
 
 export default router;
