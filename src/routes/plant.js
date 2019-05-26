@@ -1,11 +1,15 @@
 import { Router } from 'express';
 import { parse } from 'querystring';
+import mongoose from 'mongoose';
 //import { request } from 'https';
 import reqPromise from 'request-promise';
 
 const cloudinary = require('cloudinary').v2;
 
 const router = Router();
+
+// plantOfTheWeek model
+const PlantOfTheWeek = mongoose.model('PlantOfTheWeek');
 
 // cloudinary API configuration
 cloudinary.config({
@@ -99,6 +103,15 @@ const identifyPlant = async (req, res) => {
     });
 };
 
+// Route for plant identifiction
 router.route('/identify').post(identifyPlant);
+
+const getWeeklyPlant = async (req, res) => {
+  const weeklyPlant = await PlantOfTheWeek.find({});
+  res.send(weeklyPlant);
+};
+
+// Route for plant of the week
+router.route('/week').get(getWeeklyPlant);
 
 module.exports = router;
