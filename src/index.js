@@ -48,6 +48,12 @@ app.use('/plant', routes.plant);
 app.use('/usda', routes.usda);
 app.use('/plantcyclopedia', routes.plantcyclopedia);
 
+// default 'home' page of API
+app.get('/', async (req, res) => {
+  res.status(200);
+  res.send('Welcome to growio-api! Please login at /auth/google to proceed')
+});
+
 // Toggle this only when you want to clean and reset the db completely on start
 const eraseDatabaseOnSync = process.env.DB_ERASE === 'yes';
 
