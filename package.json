@@ -4,8 +4,8 @@
   "description": "Backend logic for CSE110 Project Growio",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
     "dev": "nodemon --exec babel-node src/index.js",
+    "start": "node src/index.js",
     "test": "echo \"No test specified\" && exit 0"
   },
   "keywords": [],
