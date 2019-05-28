@@ -5,7 +5,7 @@ import request from 'request-promise';
 const googleConfig = {
   clientId: '1040294904399-0t57cj80bm54jise3h0vj87fa686ront.apps.googleusercontent.com',
   clientSecret: 'hetbZQ7QIGj_-ZKFhfjwC0I3',
-  redirect: 'http://localhost:3000/auth/google/callback',
+  redirect: 'https://growio-prod-test.herokuapp.com/auth/google/callback',
 };
 
 // Create the google auth object which gives us access to talk to google's apis.
