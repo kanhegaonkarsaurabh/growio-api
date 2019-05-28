@@ -14,6 +14,22 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     default: null,
   },
+  settings: {
+    notifications: {
+      type: Boolean, 
+      default: false
+    },
+  },
+  location: {
+    type: {   // this type is of geoJSON
+      type: String,   // this type is of mongoose
+      enum: ['Point'], // 'location.type' must be 'Point'
+    },
+    coordinates: {
+      type: [Number],
+      default: [-117.23755359649657, 32.88110087702036],  // default location of Geisel
+    }
+  }
 });
 
 userSchema.statics.findByLogin = async function(login) {
