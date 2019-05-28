@@ -24,7 +24,6 @@
     "nodemon": "^1.18.9"
   },
   "dependencies": {
-    "babel": "^6.23.0",
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.3",
     "cloudinary": "^1.14.0",
