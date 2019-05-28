@@ -3,6 +3,7 @@ import { parse } from 'querystring';
 import mongoose from 'mongoose';
 import { queryPlantDetails } from '../config/usda';
 import { getPlantImage } from '../utils/scrape';
+import { isAuthenticated } from '../config/authJwt';
 
 const router = Router();
 
@@ -42,6 +43,7 @@ const searchPlantsInUSDA = async (req, res) => {
 }
 
 router.route('/search')
+  .all(isAuthenticated)
   .get(searchPlantsInUSDA);
 
 

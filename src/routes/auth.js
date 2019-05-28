@@ -55,6 +55,12 @@ const addToDb = async profile => {
       _id: new ObjectId(uidHash),
       gardenId: garden._id,
       name: profile.name,
+      settings: {
+        notifications: false
+      },
+      location: {
+        coordinates: [-117.23755359649657, 32.88110087702036]
+      }
     }).save();
   }
   return profile;
