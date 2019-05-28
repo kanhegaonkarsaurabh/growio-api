@@ -27,6 +27,7 @@ function externalUsdaRequest(url, qs) {
       var sunLight = data.Shade_Tolerance;
       var tempMin = data.Temperature_Minimum_F;
       var sciName = data.Scientific_Name_x;
+      var symbol =  data.Symbol;
 
       // check if it's empty string - if so, go to default values
       if (moistureUse == '') {
@@ -48,6 +49,7 @@ function externalUsdaRequest(url, qs) {
         moisture_use: moistureUse,
         sunlight: sunLight,
         temperature: tempMin,
+        symbol: symbol
       };
 
       // console.log(thing);

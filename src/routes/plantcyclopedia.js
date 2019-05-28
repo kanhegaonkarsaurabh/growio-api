@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { parse } from 'querystring';
 import mongoose from 'mongoose';
-import { queryPlantDetails } from '../config/usda'
+import { queryPlantDetails } from '../config/usda';
+import { getPlantImage } from '../utils/scrape';
+
 const router = Router();
 
 const searchPlantsInUSDA = async (req, res) => {
@@ -18,9 +20,17 @@ const searchPlantsInUSDA = async (req, res) => {
       const foundPlant = await queryPlantDetails(searchPlant, searchBy);
       console.log(`LOG: Using the search query ${searchPlant} and searching by ${searchBy}, the following plant was found`, foundPlant);
 
-      // return the plant found if search was successful
-      res.status(200);
-      res.send({ msg: 'SUCCESS: The following plant was found in the plantcyclopedia', data: foundPlant, success: true });
+      // Scrape and get an image for the plant from USDA's website
+      getPlantImage(foundPlant.symbol)
+        .then(imgScraped => {
+          console.log(imgScraped);
+          if (imgScraped) {
+            foundPlant.img = imgScraped;
+          }
+          // return the plant found if search was successful
+          res.status(200);
+          res.send({ msg: 'SUCCESS: The following plant was found in the plantcyclopedia', data: foundPlant, success: true });
+        })
     } catch (e) {   // catch errors if search was unsuccessful
       res.status(404);
       res.send({ msg: 'NOT FOUND: Could not find any plants that match the search query in Plantcyclopedia', success: false, data: {} });
