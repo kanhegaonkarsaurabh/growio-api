@@ -1,15 +1,19 @@
 {
-  "name": "node-express-mongodb-server",
+  "name": "growio-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend logic for CSE110 Project Growio",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec babel-node src/index.js",
+    "start": "node src/index.js",
+    "dev": "nodemon --exec babel-node src/index.js",
     "test": "echo \"No test specified\" && exit 0"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "10.x"
+  },
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/node": "^7.2.2",
