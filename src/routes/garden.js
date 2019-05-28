@@ -7,6 +7,7 @@ import mongodb from 'mongodb';
 import { resolve } from 'url';
 import colors from 'colors';
 import { uniqueObjectIdHash } from '../config/util';
+import { removeFromCloudinary, uploadToCloudinary } from '../config/cloudinary';
 
 const router = Router();
 
@@ -62,6 +63,8 @@ const addPersonalPlant = async (req, res) => {
   const sciName = req.body.sciName;
   const nickname = req.body.nickname;
 
+  const imageUrl = req.body.imageUrl ? req.body.imageUrl : null;
+
   findPlantHelper(sciName)
     .then((foundPlant) => { return { resEnd: res.end.bind(res), resSend: res.send.bind(res), resStatus: res.status.bind(res), resWriteHead: res.writeHead.bind(res), foundPlant: foundPlant } })
     .then(async function (utilObj) {
@@ -84,12 +87,21 @@ const addPersonalPlant = async (req, res) => {
       let uniqueNicknameKey = uniqueObjectIdHash(nickname + (user._id.toString()));
       let personalPlant;
       try {
+
+        const plantUrl = null;
+        // Upload plant image to cloudinary and retrieve the url
+        if (imageUrl) {
+          plantUrl = uploadToCloudinary(imageUrl);
+        }
+
         // Create the user's personal plant
         personalPlant = await new PersonalPlant({
           plant_id: addedPlant._id,
           nickname: nickname,
-          nickname_key: new ObjectId(uniqueNicknameKey)
+          nickname_key: new ObjectId(uniqueNicknameKey),
+          plant_image: plantUrl
         }).save();
+        
       } catch (e) {
         console.log(`ERROR: Could not add ${nickname} plant to PersonalPlant collection`, e);
         resStatus(404);
@@ -153,6 +165,11 @@ const removePersonalPlant = async (req, res) => {
 
   // fetch the plant to be removed from PersonalPlant collection
   const plantToBeRemoved = await PersonalPlant.findOneAndDelete({ nickname_key: new ObjectId(uniqueNicknameKey) });
+
+  // remove the plant's image from cloudinary
+  const result = removeFromCloudinary(plantToBeRemoved.plant_image);
+
+  // TODO: run check for if the removal from cloudinary fails
 
   if (!plantToBeRemoved) {
     console.log(`ERROR: Plant to be removed cannot be found in the PersonalPlant collection`.red, plantToBeRemoved);
