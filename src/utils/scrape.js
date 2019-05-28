@@ -5,6 +5,30 @@ import colors from 'colors';
 
 const PlantOfTheWeek = mongoose.model('PlantOfTheWeek');
 
+export const getPlantImage = plantCode => {
+  const pageUrl = 'https://plants.sc.egov.usda.gov';
+  const options = {
+    uri: `${pageUrl}/core/profile?symbol=${plantCode}`,
+    transform: function(body) {
+      return cheerio.load(body);
+    },
+  };
+
+  return reqPromise(options).then($ => {
+    let imageUrl = '';
+    let image = $('div[id="mainPic"]')
+      .find('img')
+      .attr('src');
+    imageUrl = `${pageUrl}${image}`;
+
+    console.log(`SUCCESS: Successfully retrieved image url for plant code ${plantCode} `.green, {imageUrl});
+
+    return imageUrl;
+
+  })
+
+}
+
 export const getPlantOfTheWeek = () => {
   const pageUrl = 'https://plants.sc.egov.usda.gov';
   const options = {

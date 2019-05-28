@@ -47,7 +47,7 @@ router
 const findPlantHelper = async (sciName) => {
   const plant = await Plant.findOne({ scientificName: sciName });
   if (!plant) {
-    const newPlant = await queryPlantDetails(sciName);
+    const newPlant = await queryPlantDetails(sciName, "sciName");   // query USDA api by the plant's sciName
     if (newPlant) {
       console.log('LOG: Following plant queried from USDA API: '.yellow, newPlant);
       return newPlant

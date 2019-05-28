@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 
 const Plant = mongoose.model('Plant');
 
-function externalUsdaRequest(url, qs, sciName) {
-  return new Promise(resolve => {
+function externalUsdaRequest(url, qs) {
+  return new Promise((resolve, reject) => {
     request({ url: url, qs: qs }, function (err, response, body) {
       // default values TODO change if necessary there are temp
       const _DEFAULT_MOISTURE = 'Medium';
@@ -12,16 +12,22 @@ function externalUsdaRequest(url, qs, sciName) {
       const _DEFAULT_TEMP = '40';
 
       // get the data we need in JSON format
-      console.log('\n\n\n\n' + body);
       var obj = JSON.parse(body);
-      var data = obj.data[0];
+      let data;
+      if (obj.data) {
+        data = obj.data[0];
+      } else {  // Reject and end execution of the promise if no plants are found
+        reject(new Error('NOT FOUND: Could not find any plants that match the search query in Plantcyclopedia'));
+        return;
+      }
 
       // extract all the info we need from the JSON list
       var moistureUse = data.Moisture_Use;
       var commonName = data.Common_Name;
       var sunLight = data.Shade_Tolerance;
       var tempMin = data.Temperature_Minimum_F;
-      var fertilizer = data.Fertility_Requirement;
+      var sciName = data.Scientific_Name_x;
+      var symbol =  data.Symbol;
 
       // check if it's empty string - if so, go to default values
       if (moistureUse == '') {
@@ -43,6 +49,7 @@ function externalUsdaRequest(url, qs, sciName) {
         moisture_use: moistureUse,
         sunlight: sunLight,
         temperature: tempMin,
+        symbol: symbol
       };
 
       // console.log(thing);
@@ -54,7 +61,7 @@ function externalUsdaRequest(url, qs, sciName) {
 
 
 
-const queryPlantDetails = async (sciName) => {
+const queryPlantDetails = async (searchQuery, searchBy) => {
   /*
   scientificName: sciName,
         commonName: commonName,
@@ -63,18 +70,25 @@ const queryPlantDetails = async (sciName) => {
         temperature: tempMin,*/
 
   // getting the genus and species based on the scientific name
-  var arr = sciName.split(' ');
-  var genus = arr[0];
-  var species = arr[1];
-
-  var plantDBurl = 'https://plantsdb.xyz/search?';
-  var queryObject = {
-    Genus: genus,
-    Species: species,
-    limit: 1,
-  };
-
-  return await externalUsdaRequest(plantDBurl, queryObject, sciName);
+  const plantDBurl = 'https://plantsdb.xyz/search?';
+  let queryObject;
+  if (searchBy === 'sciName') {
+    let arr = searchQuery.split(' ');
+    let genus = arr[0];
+    let species = arr[1];
+  
+    queryObject = {
+      Genus: genus,
+      Species: species,
+      limit: 1,
+    };
+  } else if (searchBy === 'commonName') {
+    queryObject = {
+      Common_Name: searchQuery,
+      limit: 1
+    }
+  }
+  return await externalUsdaRequest(plantDBurl, queryObject);
 };
 
 export { queryPlantDetails };

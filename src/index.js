@@ -46,6 +46,7 @@ app.use('/auth', routes.auth);
 app.use('/garden', routes.garden);
 app.use('/plant', routes.plant);
 app.use('/usda', routes.usda);
+app.use('/plantcyclopedia', routes.plantcyclopedia);
 
 // Toggle this only when you want to clean and reset the db completely on start
 const eraseDatabaseOnSync = process.env.DB_ERASE === 'yes';
