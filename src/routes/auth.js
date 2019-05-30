@@ -9,27 +9,11 @@ const Garden = mongoose.model('Garden');
 const ObjectId = mongodb.ObjectID;
 
 import {
-  createConnection,
-  getConnectionUrl,
   getGoogleAccountFromCode,
 } from '../config/google-config';
 import { isAuthenticated, signToken } from '../config/authJwt';
 
 const router = Router();
-
-// Create the google url to be sent to the client.
-function urlGoogle() {
-  const auth = createConnection(); // this is from previous step
-  const url = getConnectionUrl(auth);
-  return url;
-}
-
-const loginWithGoogle = async (req, res) => {
-  const url = urlGoogle();
-  res.json({
-    url,
-  });
-};
 
 const addToDb = async profile => {
   console.log(
@@ -72,12 +56,10 @@ const getGoogleProfile = async code => {
   return addToDb(profile);
 };
 
-router.get('/google', loginWithGoogle);
-
 // callback url upon successful google authentication
-router.get('/google/callback', (req, res) => {
+router.get('/google', (req, res) => {
   let code = '';
-  // extract code
+  // extract the access_token that is sent from the flutter frontend
   if (req && req.query) {
     code = req.query.code;
   }

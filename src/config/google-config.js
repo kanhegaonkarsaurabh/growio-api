@@ -34,14 +34,10 @@ function getConnectionUrl(auth) {
 /**
  * Part 2: Take the "code" parameter which Google gives us once when the user logs in, then get the user's email and id.
  */
-const getGoogleAccountFromCode = async code => {
-  let auth = createConnection();
-  const data = await auth.getToken(code);
-  const tokens = data.tokens;
-
+const getGoogleAccountFromCode = async (access_token) => {
   var options = {
     uri: 'https://www.googleapis.com/oauth2/v2/userinfo',
-    qs: { oauth_token: tokens.access_token, access_type: 'offline' },
+    qs: { oauth_token: access_token, access_type: 'offline' },
     headers: {
       'User-Agent': 'Request-Promise',
     },
