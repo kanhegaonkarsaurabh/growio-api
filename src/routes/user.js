@@ -33,8 +33,11 @@ router
 const updateUserNotifications = async (req, res) => {
   // Get the request body from the api 
   let notificationValue;
-  if (req.body) {
+  if (req.body && req.body.notifications !== undefined) {
     notificationValue = req.body.notifications;
+  } else {
+    res.status(404);
+    res.send({msg: 'ERROR: notifications param not present on the request body', success: false, data: {}});
   }
 
   // get the currently logged in user's id

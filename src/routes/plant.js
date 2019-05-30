@@ -3,6 +3,7 @@ import { parse } from 'querystring';
 import mongoose from 'mongoose';
 //import { request } from 'https';
 import reqPromise from 'request-promise';
+import { isAuthenticated } from '../config/authJwt';
 
 const router = Router();
 
@@ -82,7 +83,9 @@ const identifyPlant = async (req, res) => {
 };
 
 // Route for plant identifiction
-router.route('/identify').post(identifyPlant);
+router.route('/identify')
+      .all(isAuthenticated)
+      .post(identifyPlant);
 
 const getWeeklyPlant = async (req, res) => {
   const weeklyPlant = await PlantOfTheWeek.find({});

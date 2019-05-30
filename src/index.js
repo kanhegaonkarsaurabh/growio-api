@@ -64,7 +64,7 @@ connectDb().then(async () => {
   }
 
   // cron-job for web-scraping plant of the week and adding it to the database
-  cron.schedule('0 0 * * 1', setupPlantForTheWeek);
+  cron.schedule('* * * * *', setupPlantForTheWeek);
 
   app.listen(process.env.PORT, () =>
     console.log(`Example app listening on port ${process.env.PORT}!`),
