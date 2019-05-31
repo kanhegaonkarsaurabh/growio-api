@@ -93,8 +93,6 @@ const addPersonalPlant = async (req, res) => {
 
       console.log(`LOG: Following plant added to db in Plants collection`.yellow, addedPlant);
 
-      console.log(`LOG: Following personalPlant added to db in PersonalPlants collection`.yellow, personalPlant);
-
       // User id of the current user
       let userId = req.authData.userId;
       const uidHash = uniqueObjectIdHash(userId.toString());
@@ -121,7 +119,9 @@ const addPersonalPlant = async (req, res) => {
           nickname_key: new ObjectId(uniqueNicknameKey),
           plant_image: plantUrl
         }).save();
-        
+
+        console.log(`LOG: Following personalPlant added to db in PersonalPlants collection`.yellow, personalPlant);
+
       } catch (e) {
         console.log(`ERROR: Could not add ${nickname} plant to PersonalPlant collection`, e);
         resStatus(404);
