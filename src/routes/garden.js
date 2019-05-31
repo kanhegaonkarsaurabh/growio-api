@@ -27,15 +27,32 @@ const getPersonalPlants = async (req, res) => {
   // console.log(req.authData);
   const user = await User.findById(uidHash);
   console.log('this is the user: ', uidHash);
-  // const userId = req.authData.userId;
-  // const user = await User.findById(userId);
 
-  /* NOTE: Uncomment after Add to MyGarden has been implemented */
-  // get the garden id on this user
   const gardenId = user.gardenId;
   const garden = await req.context.models.Garden.findById(gardenId);
 
-  return res.json(garden.plants);
+  let responsePlants = [];
+  for (let plant of garden.plants) {
+    let resPlant = {
+      nickname: plant.nickname,
+      image: plant.plant_image
+    };
+    let usdaPlant;
+    try {
+      usdaPlant = await Plant.findById(plant.plant_id);
+    } catch (e) {
+      continue;
+    }
+    resPlant.moistureUse = usdaPlant.moisture_use;
+    resPlant.temperature = usdaPlant.temperature;
+    resPlant.sunlight = usdaPlant.sunlight;
+    resPlant.scientificName = usdaPlant.scientificName;
+    resPlant.commonName = usdaPlant.commonName;
+    
+    responsePlants.push(resPlant);
+  }
+
+  res.json({msg: 'SUCCESS: List of plants successfully retrieved from user garden', plants: responsePlants, success: true});
 };
 
 router
@@ -45,14 +62,17 @@ router
 
 
 const findPlantHelper = async (sciName) => {
-  const plant = await Plant.findOne({ scientificName: sciName });
+  // Fetch the plant from usda first
+  const plantFromUSDA = await queryPlantDetails(sciName, "sciName");
+  let plant;
+  if (plantFromUSDA) {  
+    plant = await Plant.findOne({ scientificName: plantFromUSDA.scientificName });
+  } else {
+    return null;
+  }
   if (!plant) {
-    const newPlant = await queryPlantDetails(sciName, "sciName");   // query USDA api by the plant's sciName
-    if (newPlant) {
       console.log('LOG: Following plant queried from USDA API: '.yellow, newPlant);
-      return newPlant
-    }
-    return null;    // weird
+      return plantFromUSDA;
   }
   console.log(`Plant: ${sciName} found in the local db in Plants collection`.yellow);
   return new Promise(resolve => resolve(plant));    // Returns a promise to match type of the 'return newPlant' statement
