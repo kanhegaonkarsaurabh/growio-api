@@ -71,7 +71,7 @@ const findPlantHelper = async (sciName) => {
     return null;
   }
   if (!plant) {
-      console.log('LOG: Following plant queried from USDA API: '.yellow, newPlant);
+      console.log('LOG: Following plant queried from USDA API: '.yellow, plantFromUSDA);
       return plantFromUSDA;
   }
   console.log(`Plant: ${sciName} found in the local db in Plants collection`.yellow);
