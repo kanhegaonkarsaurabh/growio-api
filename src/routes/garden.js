@@ -187,9 +187,12 @@ const removePersonalPlant = async (req, res) => {
   const plantToBeRemoved = await PersonalPlant.findOneAndDelete({ nickname_key: new ObjectId(uniqueNicknameKey) });
 
   // remove the plant's image from cloudinary
-  const result = removeFromCloudinary(plantToBeRemoved.plant_image);
+  let result;
+  if (plantToBeRemoved.plant_image) {
+    // TODO: run check for if the removal from cloudinary fails
+    result = removeFromCloudinary(plantToBeRemoved.plant_image);
+  }
 
-  // TODO: run check for if the removal from cloudinary fails
 
   if (!plantToBeRemoved) {
     console.log(`ERROR: Plant to be removed cannot be found in the PersonalPlant collection`.red, plantToBeRemoved);
