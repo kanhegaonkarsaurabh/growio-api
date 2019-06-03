@@ -106,7 +106,7 @@ const addPersonalPlant = async (req, res) => {
       let personalPlant;
       try {
 
-        const plantUrl = null;
+        let plantUrl = null;
         // Upload plant image to cloudinary and retrieve the url
         if (imageUrl) {
           plantUrl = uploadToCloudinary(imageUrl);
