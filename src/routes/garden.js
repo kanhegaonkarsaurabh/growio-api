@@ -162,12 +162,12 @@ const addPersonalPlant = async (req, res) => {
 
 const removePersonalPlant = async (req, res) => {
   // console log the request
-  console.log('THE REQ: ', req);
+  console.log('THE REQ: ', req.query);
 
   // get the id of the personalPlant to remove
   let nicknameToRemove;
-  if (req.body) {
-    nicknameToRemove = req.body.nickname;
+  if (req.query) {
+    nicknameToRemove = req.query.nickname;
   }
 
   // User id of the current user
