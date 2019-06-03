@@ -8,26 +8,30 @@ cloudinary.config({
 });
 
 export const uploadToCloudinary = plantUrl => {
-  cloudinary.uploader.upload(
-    plantUrl,
-    { folder: 'plants_identify', width: 500, height: 500, crop: 'limit' },
-    function(err, image) {
-      if (err) {
-        console.log(err);
-        return null;
-      }
-      return image.url;
-    },
-  );
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload(
+      plantUrl,
+      { folder: 'plants_identify', width: 500, height: 500, crop: 'limit' },
+      function (err, imgUrl) {
+        if (err) {
+          return reject(err);
+        }
+        resolve(imgUrl);
+      },
+    );
+  });
 };
 
 export const removeFromCloudinary = plantUrl => {
-  const id = plantUrl.split('/')[6].split('.')[0];
+  return new Promise((resolve, reject) => {
+    const id = plantUrl.split('/')[6].split('.')[0];
 
-  cloudinary.uploader.destroy(id, (err, res) => {
-    if (err) {
-      console.log(err);
-    }
-    return res.result;
+    cloudinary.uploader.destroy(id, (err, res) => {
+      if (err) {
+        console.log(err);
+        return reject(err);
+      }
+      resolve(res.result);
+    });
   });
 };

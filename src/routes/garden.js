@@ -109,7 +109,7 @@ const addPersonalPlant = async (req, res) => {
         let plantUrl = null;
         // Upload plant image to cloudinary and retrieve the url
         if (imageUrl) {
-          plantUrl = uploadToCloudinary(imageUrl);
+          plantUrl = await uploadToCloudinary(imageUrl);
         }
 
         // Create the user's personal plant
@@ -193,7 +193,7 @@ const removePersonalPlant = async (req, res) => {
   let result;
   if (plantToBeRemoved.plant_image) {
     // TODO: run check for if the removal from cloudinary fails
-    result = removeFromCloudinary(plantToBeRemoved.plant_image);
+    result = await removeFromCloudinary(plantToBeRemoved.plant_image);
   }
 
 
