@@ -12,11 +12,11 @@ export const uploadToCloudinary = plantUrl => {
     cloudinary.uploader.upload(
       plantUrl,
       { folder: 'plants_identify', width: 500, height: 500, crop: 'limit' },
-      function (err, imgUrl) {
+      function (err, img) {
         if (err) {
           return reject(err);
         }
-        resolve(imgUrl);
+        resolve(img.url);
       },
     );
   });
