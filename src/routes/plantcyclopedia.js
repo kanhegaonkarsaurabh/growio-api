@@ -27,7 +27,10 @@ const searchPlantsInUSDA = async (req, res) => {
           console.log(imgScraped);
           if (imgScraped) {
             foundPlant.img = imgScraped;
+          } else {
+            foundPlant.img = null;
           }
+          
           // return the plant found if search was successful
           res.status(200);
           res.send({ msg: 'SUCCESS: The following plant was found in the plantcyclopedia', data: foundPlant, success: true });

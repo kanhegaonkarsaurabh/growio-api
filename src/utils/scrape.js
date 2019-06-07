@@ -29,7 +29,6 @@ export const getPlantImage = plantCode => {
     console.log(`SUCCESS: Successfully retrieved image url for plant code ${plantCode} `.green, {imageUrl});
 
     return imageUrl;
-
   })
 
 }
