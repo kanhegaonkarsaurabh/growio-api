@@ -17,6 +17,7 @@ function externalUsdaRequest(url, qs) {
       if (obj.data) {
         data = obj.data[0];
       } else {  // Reject and end execution of the promise if no plants are found
+        console.log('ERROR: Fetching through usda: ', err, response, body);
         reject(new Error('NOT FOUND: Could not find any plants that match the search query in Plantcyclopedia'));
         return;
       }
@@ -88,6 +89,8 @@ const queryPlantDetails = async (searchQuery, searchBy) => {
       limit: 1
     }
   }
+
+  console.log('Queries received at the frontend: ', queryObject);
   return await externalUsdaRequest(plantDBurl, queryObject);
 };
 

@@ -83,6 +83,8 @@ const addPersonalPlant = async (req, res) => {
   const sciName = req.body.sciName;
   const nickname = req.body.nickname;
 
+  console.log('Add to MyGarden requested: ', sciName, nickname);
+
   const imageUrl = req.body.imageUrl ? req.body.imageUrl : null;
 
   findPlantHelper(sciName)
