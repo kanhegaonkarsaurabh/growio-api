@@ -28,7 +28,7 @@ function externalUsdaRequest(url, qs) {
       var sunLight = data.Shade_Tolerance;
       var tempMin = data.Temperature_Minimum_F;
       var sciName = data.Scientific_Name_x;
-      var symbol =  data.Symbol;
+      var symbol = data.Symbol;
 
       // check if it's empty string - if so, go to default values
       if (moistureUse == '') {
@@ -77,12 +77,20 @@ const queryPlantDetails = async (searchQuery, searchBy) => {
     let arr = searchQuery.split(' ');
     let genus = arr[0];
     let species = arr[1];
-  
-    queryObject = {
-      Genus: genus,
-      Species: species,
-      limit: 1,
-    };
+
+    let re = new RegExp("^([a-zA-Z])\.");
+    if (re.test(species)) {
+      queryObject = {
+        Genus: genus,
+        limit: 3,
+      }
+    } else {
+      queryObject = {
+        Genus: genus,
+        Species: species,
+        limit: 3,
+      };
+    }
   } else if (searchBy === 'commonName') {
     queryObject = {
       Common_Name: searchQuery,
