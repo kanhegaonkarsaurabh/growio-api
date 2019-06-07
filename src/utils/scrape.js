@@ -19,6 +19,11 @@ export const getPlantImage = plantCode => {
     let image = $('div[id="mainPic"]')
       .find('img')
       .attr('src');
+
+    if (typeof image == 'undefined' || typeof image == 'null') {
+      return null;
+    }
+
     imageUrl = `${pageUrl}${image}`;
 
     console.log(`SUCCESS: Successfully retrieved image url for plant code ${plantCode} `.green, {imageUrl});
