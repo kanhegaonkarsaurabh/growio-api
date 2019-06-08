@@ -10,7 +10,6 @@ const plantSchema = new mongoose.Schema({
   },
   commonName: {
     type: String,
-    required: true,
   },
   moisture_use: {
     type: String,
