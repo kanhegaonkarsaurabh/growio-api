@@ -79,6 +79,8 @@ const queryPlantDetails = async (searchQuery, searchBy) => {
     let species = arr[1];
 
     let re = new RegExp("^([a-zA-Z])\.");
+    console.log('LOG: ', species);
+    console.log('LOG: ' + species.length + ', ' + re.test(species));
     if (species.length == 2 && re.test(species)) {
       queryObject = {
         Genus: genus,
