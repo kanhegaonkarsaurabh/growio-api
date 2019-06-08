@@ -79,7 +79,7 @@ const queryPlantDetails = async (searchQuery, searchBy) => {
     let species = arr[1];
 
     let re = new RegExp("^([a-zA-Z])\.");
-    if (re.test(species)) {
+    if (species.length == 2 && re.test(species)) {
       queryObject = {
         Genus: genus,
         limit: 3,
@@ -94,7 +94,7 @@ const queryPlantDetails = async (searchQuery, searchBy) => {
   } else if (searchBy === 'commonName') {
     queryObject = {
       Common_Name: searchQuery,
-      limit: 1
+      limit: 3
     }
   }
 
